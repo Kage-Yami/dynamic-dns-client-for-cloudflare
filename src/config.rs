@@ -12,11 +12,7 @@ pub struct Config {
     #[argh(option, short = 'd')]
     domain: String,
 
-    /// the email address of the domain's owner
-    #[argh(option, short = 'e')]
-    email: String,
-
     /// the API key with permissions to query and update the DNS record
     #[argh(option, short = 'a')]
-    api_key: String,
+    api_token: String,
 }
