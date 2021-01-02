@@ -48,6 +48,58 @@ impl<'a> Client<'a> {
         Ok(body.result.swap_remove(0))
     }
 
+    pub fn fetch_dns_record(
+        &self,
+        zone_id: &str,
+        dns_record: &str,
+        dns_record_type: DnsRecordType,
+    ) -> anyhow::Result<DnsRecord> {
+        let response = ureq::get(&format!(
+            "https://api.cloudflare.com/client/v4/zones/{zone_identifier}/dns/records",
+            zone_identifier = zone_id
+        ))
+        .query("name", dns_record)
+        .query("type", &dns_record_type.to_string())
+        .set("content-type", "application/json")
+        .set("authorization", &format!("Bearer {}", self.api_token))
+        .call();
+
+        let mut body: ApiResponse<DnsRecord> = response
+            .into_json_deserialize()
+            .context(format!("failed to parse DNS Records ({}) JSON response", dns_record_type))?;
+
+        if !body.errors.is_empty() {
+            if body.errors.len() > 1 {
+                eprintln!("Errors returned from DNS Records ({}) API:", dns_record_type);
+                for error in &body.errors {
+                    eprintln!("- {}", error);
+                }
+
+                // cannot panic; only runs when body.errors.len() > 1
+                anyhow::bail!(
+                    "Errors returned from DNS Records ({}) API; first one (see stderror for others): {}",
+                    dns_record_type,
+                    body.errors[0]
+                );
+            } else {
+                // cannot panic; only runs with body.errors.len() >= 1
+                anyhow::bail!("Error returned from DNS Records ({}) API: {}", dns_record_type, body.errors[0]);
+            }
+        }
+
+        if body.result.len() != 1 {
+            anyhow::bail!(
+                "Unexpected number of DNS Records ({}) results; should be 1: {}",
+                dns_record_type,
+                body.result.len()
+            );
+        }
+
+        // cannot panic; only runs when body.result.len() == 1
+        Ok(body.result.swap_remove(0))
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq, Hash)]
 struct ApiResponse<T: ApiResult> {
     result: Vec<T>,
@@ -85,3 +137,18 @@ pub struct DnsRecord {
 }
 
 impl ApiResult for DnsRecord {}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
+pub enum DnsRecordType {
+    A,
+    AAAA,
+}
+
+impl Display for DnsRecordType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            DnsRecordType::A => write!(f, "A"),
+            DnsRecordType::AAAA => write!(f, "AAAA"),
+        }
+    }
+}
