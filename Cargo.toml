@@ -1,11 +1,11 @@
 [package]
-name = "cloudflare-dynamic-dns-client"
+name = "dynamic-dns-client-for-cloudflare"
 description = "A CLI utility to update the A and AAAA DNS records of a domain managed by Cloudflare, from the executing system's current public IP address"
 version = "0.1.0"
 authors = ["Joel Smith <j.d.smith@outlook.com.au>"]
 edition = "2018"
 license = "MIT"
-repository = "https://gitlab.com/Kage-Yami/cloudflare-dynamic-dns-client"
+repository = "https://gitlab.com/Kage-Yami/dynamic-dns-client-for-cloudflare"
 readme = "README.md"
 keywords = ["cli", "utility", "dns", "cloudflare"]
 categories = ["command-line-utilities"]

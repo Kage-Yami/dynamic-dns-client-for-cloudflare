@@ -9,7 +9,7 @@
 
 ### 1.0.0 - _unreleased_
 
-- Initial "stable" release and publication to [crates.io](https://crates.io/crates/cloudflare-dynamic-dns-client)
+- Initial "stable" release and publication to [crates.io](https://crates.io/crates/dynamic-dns-client-for-cloudflare)
 
 ## Pre-release versions
 

@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/cloudflare-dynamic-dns-client.iml" filepath="$PROJECT_DIR$/.idea/cloudflare-dynamic-dns-client.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/dynamic-dns-client-for-cloudflare.iml" filepath="$PROJECT_DIR$/.idea/dynamic-dns-client-for-cloudflare.iml" />
     </modules>
   </component>
 </project>
