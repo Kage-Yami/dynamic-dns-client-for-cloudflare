@@ -7,14 +7,53 @@
 //
 #![doc(html_root_url = "https://docs.rs/dynamic-dns-client-for-cloudflare/0.1.0")]
 
+//! # Usage
+//!
+//! **It is _strongly_ recommended that a specialised API token is used only for this. This will reduce the scope of any damage if it were to leak, and reduce the impact when cycling the token.**
+//!
+//! The permissions required are:
+//! - `#zone:read`
+//! - `#dns_records:read`
+//! - `#dns_records:edit`
+//!
+//! ## Once-off update
+//!
+//! To initiate a DNS record update, simply execute the utility like so:
+//!
+//! Windows:
+//!
+//! ```powershell
+//! ./ddns-for-cloudflare.exe --zone $ZoneName --domain $DomainName --api-token $ApiToken
+//! ```
+//!
+//! Linux:
+//!
+//! ```sh
+//! ./ddns-for-cloudflare --zone $zone_name --domain $domain_name --api-token $api_token
+//! ```
+//!
+//! To only update the A or AAAA record, additionally pass in the `--only-v4` or `--only-v6` switches, respectively.
+//!
+//! ## Recurring - Windows
+//!
+//! _To be documented..._
+//!
+//! ## Recurring - Linux (`systemd`)
+//!
+//! _To be documented..._
+
 use crate::api::cloudflare::DnsRecordType;
 use anyhow::Context;
 use config::Config;
 use std::net::IpAddr;
 
+#[doc(hidden)]
 mod api;
+
+#[doc(hidden)]
 mod config;
 
+#[doc(hidden)]
 fn main() -> anyhow::Result<()> {
     let config: Config = argh::from_env();
 
