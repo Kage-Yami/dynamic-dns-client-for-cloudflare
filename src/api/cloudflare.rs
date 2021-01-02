@@ -15,12 +15,13 @@ impl<'a> Client<'a> {
         Self { api_token }
     }
 
-    pub fn fetch_zone(&self, zone: &str) -> anyhow::Result<String> {
+    pub fn fetch_zone(&self, zone: &str) -> anyhow::Result<Zone> {
         let response = ureq::get("https://api.cloudflare.com/client/v4/zones")
             .query("name", zone)
             .set("content-type", "application/json")
             .set("authorization", &format!("Bearer {}", self.api_token))
             .call();
+
         let mut body: ApiResponse<Zone> =
             response.into_json_deserialize().context("failed to parse Zones JSON response")?;
 
@@ -35,7 +36,7 @@ impl<'a> Client<'a> {
                 anyhow::bail!("Errors returned from Zones API; first one (see stderr for others): {}", body.errors[0]);
             } else {
                 // cannot panic; only runs when body.errors.len() >= 1
-                anyhow::bail!("Error returned from Zones API: {}", body.errors[0])
+                anyhow::bail!("Error returned from Zones API: {}", body.errors[0]);
             }
         }
 
@@ -44,7 +45,7 @@ impl<'a> Client<'a> {
         }
 
         // cannot panic; only runs when body.result.len() == 1
-        Ok(body.result.swap_remove(0).id)
+        Ok(body.result.swap_remove(0))
     }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq, Hash)]
@@ -70,14 +71,14 @@ impl Error for ApiError {}
 trait ApiResult {}
 
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq, Hash)]
-struct Zone {
+pub struct Zone {
     id: String,
 }
 
 impl ApiResult for Zone {}
 
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq, Hash)]
-struct DnsRecord {
+pub struct DnsRecord {
     id: String,
     locked: bool,
     content: IpAddr,
