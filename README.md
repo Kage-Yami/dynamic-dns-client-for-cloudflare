@@ -7,6 +7,7 @@
   - [Once-off update](#once-off-update)
   - [Recurring - Windows](#recurring---windows)
   - [Recurring - Linux (`systemd`)](#recurring---linux-systemd)
+- [Attributions](#attributions)
 
 ## Overview
 
@@ -45,6 +46,6 @@ _To be documented..._
 
 _To be documented..._
 
-# Attributions
+## Attributions
 
 _Cloudflare is a registered trademark of Cloudflare, Inc._
