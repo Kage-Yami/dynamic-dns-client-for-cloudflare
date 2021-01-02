@@ -7,6 +7,13 @@
 //
 #![doc(html_root_url = "https://docs.rs/dataweave/0.1.0")]
 
+use config::Config;
+
+mod api;
+mod config;
+
 fn main() -> anyhow::Result<()> {
-    Ok(())
+    let _: Config = argh::from_env();
+
+    todo!("main")
 }

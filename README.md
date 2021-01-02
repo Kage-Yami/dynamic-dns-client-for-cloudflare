@@ -10,7 +10,8 @@
 
 ## Overview
 
-A CLI utility to update the A and AAAA DNS records of a domain managed by Cloudflare (written in Rust).
+A CLI utility to update the A and AAAA DNS records of a domain managed by Cloudflare, from the executing system's
+current public IP address (written in Rust).
 
 [![Crates.io version](https://img.shields.io/crates/v/cloudflare-dynamic-dns-client?style=for-the-badge)](https://docs.rs/cloudflare-dynamic-dns-client/latest/cloudflare-dynamic-dns-client/)
 [![Crates.io downloads](https://img.shields.io/crates/d/cloudflare-dynamic-dns-client?style=for-the-badge)](https://crates.io/crates/cloudflare-dynamic-dns-client)
