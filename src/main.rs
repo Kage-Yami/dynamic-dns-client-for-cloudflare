@@ -1,6 +1,6 @@
 // Enable all clippy lints and enforce, and opt out of individual lints
 #![cfg_attr(feature = "cargo-clippy", warn(clippy::cargo, clippy::pedantic, clippy::nursery))]
-#![cfg_attr(feature = "cargo-clippy", allow(clippy::must_use_candidate))]
+#![cfg_attr(feature = "cargo-clippy", allow(clippy::default_trait_access, clippy::must_use_candidate))]
 //
 // Force certain lints to be errors
 #![deny(unused_must_use)]
@@ -25,7 +25,9 @@ fn main() -> anyhow::Result<()> {
     let cloudflare = api::cloudflare::Client::new(config.api_token());
     let zone = cloudflare.fetch_zone(config.zone()).context("failed to fetch DNS Zone")?;
 
-    let ipv4 = if !config.only_v6() {
+    let ipv4 = if config.only_v6() {
+        None
+    } else {
         let record = cloudflare
             .fetch_dns_record(zone.id(), config.domain(), DnsRecordType::A)
             .context("failed to fetch DNS A Record")?;
@@ -40,11 +42,11 @@ fn main() -> anyhow::Result<()> {
         } else {
             Some((record, ip))
         }
-    } else {
-        None
     };
 
-    let ipv6 = if !config.only_v4() {
+    let ipv6 = if config.only_v4() {
+        None
+    } else {
         let record = cloudflare
             .fetch_dns_record(zone.id(), config.domain(), DnsRecordType::AAAA)
             .context("failed to fetch DNS AAAA Record")?;
@@ -59,13 +61,9 @@ fn main() -> anyhow::Result<()> {
         } else {
             Some((record, ip))
         }
-    } else {
-        None
     };
 
-    if ipv4.is_some() {
-        let (record, ip) = ipv4.unwrap();
-
+    if let Some((record, ip)) = ipv4 {
         cloudflare
             .update_dns_record(zone.id(), record.id(), IpAddr::V4(ip))
             .context("failed to update DNS A Record")?;
@@ -73,9 +71,7 @@ fn main() -> anyhow::Result<()> {
         println!("A Record updated to: {}", ip);
     }
 
-    if ipv6.is_some() {
-        let (record, ip) = ipv6.unwrap();
-
+    if let Some((record, ip)) = ipv6 {
         cloudflare
             .update_dns_record(zone.id(), record.id(), IpAddr::V6(ip))
             .context("failed to update DNS AAAA Record")?;

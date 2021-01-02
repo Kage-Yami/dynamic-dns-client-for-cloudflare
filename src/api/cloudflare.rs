@@ -12,7 +12,7 @@ pub struct Client<'a> {
 }
 
 impl<'a> Client<'a> {
-    pub fn new(api_token: &'a str) -> Self {
+    pub const fn new(api_token: &'a str) -> Self {
         Self { api_token }
     }
 
@@ -176,11 +176,11 @@ impl DnsRecord {
         &self.id
     }
 
-    pub fn locked(&self) -> bool {
+    pub const fn locked(&self) -> bool {
         self.locked
     }
 
-    pub fn content(&self) -> IpAddr {
+    pub const fn content(&self) -> IpAddr {
         self.content
     }
 }
@@ -196,8 +196,8 @@ pub enum DnsRecordType {
 impl Display for DnsRecordType {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            DnsRecordType::A => write!(f, "A"),
-            DnsRecordType::AAAA => write!(f, "AAAA"),
+            Self::A => write!(f, "A"),
+            Self::AAAA => write!(f, "AAAA"),
         }
     }
 }

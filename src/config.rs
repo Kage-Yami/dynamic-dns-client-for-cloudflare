@@ -38,11 +38,11 @@ impl Config {
         &self.api_token
     }
 
-    pub fn only_v4(&self) -> bool {
+    pub const fn only_v4(&self) -> bool {
         self.only_v4
     }
 
-    pub fn only_v6(&self) -> bool {
+    pub const fn only_v6(&self) -> bool {
         self.only_v6
     }
 }
