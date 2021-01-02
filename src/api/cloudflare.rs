@@ -4,6 +4,7 @@ use std::error::Error;
 use std::fmt;
 use std::fmt::{Display, Formatter};
 use std::net::IpAddr;
+use ureq::json;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 pub struct Client<'a> {
@@ -97,6 +98,40 @@ impl<'a> Client<'a> {
 
         // cannot panic; only runs when body.result.len() == 1
         Ok(body.result.swap_remove(0))
+    }
+
+    pub fn update_dns_record(&self, zone_id: &str, dns_record_id: &str, ip: IpAddr) -> anyhow::Result<()> {
+        let response = ureq::patch(&format!(
+            "https://api.cloudflare.com/client/v4/zones/{zone_identifier}/dns/records/{identifier}",
+            zone_identifier = zone_id,
+            identifier = dns_record_id
+        ))
+        .set("content-type", "application/json")
+        .set("authorization", &format!("Bearer {}", self.api_token))
+        .send_json(json!({ "content": ip }));
+
+        let body: APiResponse<DnsRecord> =
+            response.into_json_deserialize().context("failed to parse DNS Records update JSON response")?;
+
+        if !body.errors.is_empty() {
+            if body.errors.len() > 1 {
+                eprintln!("Errors returned from DNS Records update API:");
+                for error in &body.errors {
+                    eprintln!("- {}", error);
+                }
+
+                // cannot panic; only runs when body.errors.len() > 1
+                anyhow::bail!(
+                    "Errors returned from DNS Records update API; first one (see stderror for others): {}",
+                    body.errors[0]
+                );
+            } else {
+                // cannot panic; only runs when body.errors.len() >= 1
+                anyhow::bail!("Error returned from DNS Records update API: {}", body.errors[0]);
+            }
+        }
+
+        Ok(())
     }
 }
 
