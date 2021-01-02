@@ -15,4 +15,34 @@ pub struct Config {
     /// the API key with permissions to query and update the DNS record
     #[argh(option, short = 'a')]
     api_token: String,
+
+    /// only update the A record (IPv4)
+    #[argh(switch, short = '4')]
+    only_v4: bool,
+
+    /// only update the AAAA record (IPv6)
+    #[argh(switch, short = '6')]
+    only_v6: bool,
+}
+
+impl Config {
+    pub fn zone(&self) -> &str {
+        &self.zone
+    }
+
+    pub fn domain(&self) -> &str {
+        &self.domain
+    }
+
+    pub fn api_token(&self) -> &str {
+        &self.api_token
+    }
+
+    pub fn only_v4(&self) -> bool {
+        self.only_v4
+    }
+
+    pub fn only_v6(&self) -> bool {
+        self.only_v6
+    }
 }

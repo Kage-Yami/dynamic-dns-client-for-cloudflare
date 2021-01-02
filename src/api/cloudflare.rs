@@ -65,35 +65,29 @@ impl<'a> Client<'a> {
         .set("authorization", &format!("Bearer {}", self.api_token))
         .call();
 
-        let mut body: ApiResponse<DnsRecord> = response
-            .into_json_deserialize()
-            .context(format!("failed to parse DNS Records ({}) JSON response", dns_record_type))?;
+        let mut body: ApiResponse<DnsRecord> =
+            response.into_json_deserialize().context("failed to parse DNS Records JSON response")?;
 
         if !body.errors.is_empty() {
             if body.errors.len() > 1 {
-                eprintln!("Errors returned from DNS Records ({}) API:", dns_record_type);
+                eprintln!("Errors returned from DNS Records API:");
                 for error in &body.errors {
                     eprintln!("- {}", error);
                 }
 
                 // cannot panic; only runs when body.errors.len() > 1
                 anyhow::bail!(
-                    "Errors returned from DNS Records ({}) API; first one (see stderror for others): {}",
-                    dns_record_type,
+                    "Errors returned from DNS Records API; first one (see stderror for others): {}",
                     body.errors[0]
                 );
             } else {
                 // cannot panic; only runs with body.errors.len() >= 1
-                anyhow::bail!("Error returned from DNS Records ({}) API: {}", dns_record_type, body.errors[0]);
+                anyhow::bail!("Error returned from DNS Records API: {}", body.errors[0]);
             }
         }
 
         if body.result.len() != 1 {
-            anyhow::bail!(
-                "Unexpected number of DNS Records ({}) results; should be 1: {}",
-                dns_record_type,
-                body.result.len()
-            );
+            anyhow::bail!("Unexpected number of DNS Records results; should be 1: {}", body.result.len());
         }
 
         // cannot panic; only runs when body.result.len() == 1
@@ -110,7 +104,7 @@ impl<'a> Client<'a> {
         .set("authorization", &format!("Bearer {}", self.api_token))
         .send_json(json!({ "content": ip }));
 
-        let body: APiResponse<DnsRecord> =
+        let body: ApiResponse<DnsRecord> =
             response.into_json_deserialize().context("failed to parse DNS Records update JSON response")?;
 
         if !body.errors.is_empty() {
@@ -162,6 +156,12 @@ pub struct Zone {
     id: String,
 }
 
+impl Zone {
+    pub fn id(&self) -> &str {
+        &self.id
+    }
+}
+
 impl ApiResult for Zone {}
 
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq, Hash)]
@@ -169,6 +169,20 @@ pub struct DnsRecord {
     id: String,
     locked: bool,
     content: IpAddr,
+}
+
+impl DnsRecord {
+    pub fn id(&self) -> &str {
+        &self.id
+    }
+
+    pub fn locked(&self) -> bool {
+        self.locked
+    }
+
+    pub fn content(&self) -> IpAddr {
+        self.content
+    }
 }
 
 impl ApiResult for DnsRecord {}

@@ -1,2 +1,2 @@
-mod cloudflare;
-mod ip;
+pub mod cloudflare;
+pub mod ip;
