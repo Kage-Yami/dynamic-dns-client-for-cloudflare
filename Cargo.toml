@@ -1,0 +1,26 @@
+[package]
+name = "cloudflare-dynamic-dns-client"
+description = "A CLI utility to update the A and AAAA DNS records of a domain managed by Cloudflare"
+version = "0.1.0"
+authors = ["Joel Smith <j.d.smith@outlook.com.au>"]
+edition = "2018"
+license = "MIT"
+repository = "https://gitlab.com/Kage-Yami/cloudflare-dynamic-dns-client"
+readme = "README.md"
+keywords = ["cli", "utility", "dns", "cloudflare"]
+categories = ["command-line-utilities"]
+
+include = ["src/*", "tests/*", "Cargo.toml", "CHANGELOG.md", "LICENSE", "README.md"]
+
+publish = false
+
+[dependencies]
+anyhow = "1.0.37"
+
+[build-dependencies]
+
+[dev-dependencies]
+version-sync = "0.9.1"
+
+[profile.release]
+lto = true
