@@ -5,7 +5,7 @@
 // Force certain lints to be errors
 #![deny(unused_must_use)]
 //
-#![doc(html_root_url = "https://docs.rs/dataweave/0.1.0")]
+#![doc(html_root_url = "https://docs.rs/dynamic-dns-client-for-cloudflare/0.1.0")]
 
 use crate::api::cloudflare::DnsRecordType;
 use anyhow::Context;

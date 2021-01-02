@@ -43,7 +43,7 @@ lint:
   <<: *test
   script:
     - cargo clippy &> >(tee lint.txt)
-#    - test $(grep --count '^warning' lint.txt) -eq 0
+    - test $(grep --count '^warning' lint.txt) -eq 0
 
 coverage:
   <<: *test
