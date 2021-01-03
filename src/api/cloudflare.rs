@@ -18,10 +18,14 @@ impl<'a> Client<'a> {
         Self { api_token, fetch: Self::get, update: Self::patch }
     }
 
+    // mocked
+    #[cfg(not(tarpaulin_include))]
     fn get(mut request: Request) -> Response {
         request.call()
     }
 
+    // mocked
+    #[cfg(not(tarpaulin_include))]
     fn patch(mut request: Request, json: SerdeValue) -> Response {
         request.send_json(json)
     }

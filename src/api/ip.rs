@@ -13,6 +13,8 @@ impl Client {
         Self { fetch: Self::get }
     }
 
+    // mocked
+    #[cfg(not(tarpaulin_include))]
     fn get(mut request: Request) -> Response {
         request.call()
     }
@@ -34,13 +36,13 @@ impl Client {
         let response = (self.fetch)(ureq::get("https://ip6only.me/api/"));
 
         if response.status() != 200 {
-            anyhow::bail!("failed to fetch Ipv6 from API - {} {}", response.status(), response.status_text());
+            anyhow::bail!("failed to fetch IPv6 from API - {} {}", response.status(), response.status_text());
         }
 
-        let body = response.into_string().context("failed to parse Ipv6 response")?;
-        let ip = body.split(',').nth(1).context("failed to read Ipv6 from body")?;
+        let body = response.into_string().context("failed to parse IPv6 response")?;
+        let ip = body.split(',').nth(1).context("failed to read IPv6 from body")?;
 
-        Ipv6Addr::from_str(ip).context("failed to parse Ipv6 address")
+        Ipv6Addr::from_str(ip).context("failed to parse IPv6 address")
     }
 }
 
