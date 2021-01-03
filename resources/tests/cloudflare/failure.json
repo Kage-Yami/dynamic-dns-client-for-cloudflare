@@ -1,0 +1,17 @@
+{
+  "success": false,
+  "errors": [
+    {
+      "code": 6003,
+      "message": "Invalid request headers",
+      "error_chain": [
+        {
+          "code": 6111,
+          "message": "Invalid format for Authorization header"
+        }
+      ]
+    }
+  ],
+  "messages": [],
+  "result": null
+}

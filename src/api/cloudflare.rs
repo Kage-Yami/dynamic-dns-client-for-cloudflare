@@ -54,7 +54,7 @@ impl<'a> Client<'a> {
             .set("authorization", &format!("Bearer {}", self.api_token));
         let response = (self.get_zone)(request);
 
-        let mut body: ApiResponse<Zone> =
+        let body: ApiResponse<Zone> =
             response.into_json_deserialize().context("failed to parse Zones JSON response")?;
 
         if !body.errors.is_empty() {
@@ -72,12 +72,16 @@ impl<'a> Client<'a> {
             }
         }
 
-        if body.result.len() != 1 {
-            anyhow::bail!("Unexpected number of Zone results; should be 1: {}", body.result.len());
-        }
+        if let Some(mut result) = body.result {
+            if result.len() != 1 {
+                anyhow::bail!("Unexpected number of Zone results; should be 1: {}", result.len());
+            }
 
-        // cannot panic; only runs when body.result.len() == 1
-        Ok(body.result.swap_remove(0))
+            // cannot panic; only runs when result.len() == 1
+            Ok(result.swap_remove(0))
+        } else {
+            anyhow::bail!("Zone results is unexpectedly empty; should be 1 result");
+        }
     }
 
     pub fn fetch_dns_record(
@@ -97,7 +101,7 @@ impl<'a> Client<'a> {
             .set("authorization", &format!("Bearer {}", self.api_token));
         let response = (self.get_dns_record)(request);
 
-        let mut body: ApiResponse<DnsRecord> =
+        let body: ApiResponse<DnsRecord> =
             response.into_json_deserialize().context("failed to parse DNS Records JSON response")?;
 
         if !body.errors.is_empty() {
@@ -118,12 +122,16 @@ impl<'a> Client<'a> {
             }
         }
 
-        if body.result.len() != 1 {
-            anyhow::bail!("Unexpected number of DNS Records results; should be 1: {}", body.result.len());
-        }
+        if let Some(mut result) = body.result {
+            if result.len() != 1 {
+                anyhow::bail!("Unexpected number of DNS Records results; should be 1: {}", result.len());
+            }
 
-        // cannot panic; only runs when body.result.len() == 1
-        Ok(body.result.swap_remove(0))
+            // cannot panic; only runs when result.len() == 1
+            Ok(result.swap_remove(0))
+        } else {
+            anyhow::bail!("DNS Records results is unexpectedly empty; should be 1 result");
+        }
     }
 
     pub fn update_dns_record(&self, zone_id: &str, dns_record_id: &str, ip: IpAddr) -> anyhow::Result<()> {
@@ -162,7 +170,7 @@ impl<'a> Client<'a> {
 
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq, Hash)]
 struct ApiResponse<T: ApiResult> {
-    result: Vec<T>,
+    result: Option<Vec<T>>,
     errors: Vec<ApiError>,
 }
 
@@ -170,11 +178,12 @@ struct ApiResponse<T: ApiResult> {
 struct ApiError {
     code: i128,
     message: String,
+    error_chain: Option<Vec<ApiError>>,
 }
 
 impl Display for ApiError {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "[{}] {}", self.code, self.message)
+        write!(f, "{:#?}", self)
     }
 }
 
@@ -269,6 +278,10 @@ pub mod tests {
         Response::new(200, "OK", include_str!("../../resources/tests/cloudflare/dns_record.json"))
     }
 
+    fn mock_failure(_: Request) -> Response {
+        Response::new(400, "Bad Request", include_str!("../../resources/tests/cloudflare/failure.json"))
+    }
+
     #[test]
     fn fetch_zone() -> anyhow::Result<()> {
         let mut client = api::cloudflare::Client::new(API_TOKEN);
@@ -304,6 +317,19 @@ pub mod tests {
                 .update_dns_record(ZONE_ID, DNS_RECORD_ID, IpAddr::V4(Ipv4Addr::LOCALHOST))
                 .context("failed to update mock DNS Record")?,
             ()
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn failure() -> anyhow::Result<()> {
+        let mut client = api::cloudflare::Client::new(API_TOKEN);
+        client.get_zone = mock_failure;
+
+        assert_eq!(
+            client.fetch_zone("example.com").unwrap_err().to_string(),
+            include_str!("../../resources/tests/cloudflare/failure.txt").trim()
         );
 
         Ok(())

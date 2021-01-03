@@ -1,0 +1,13 @@
+Error returned from Zones API: ApiError {
+    code: 6003,
+    message: "Invalid request headers",
+    error_chain: Some(
+        [
+            ApiError {
+                code: 6111,
+                message: "Invalid format for Authorization header",
+                error_chain: None,
+            },
+        ],
+    ),
+}
