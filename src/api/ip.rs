@@ -5,12 +5,13 @@ use ureq::{Request, Response};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 pub struct Client {
-    fetch: fn(Request) -> Response,
+    fetch_v4: fn(Request) -> Response,
+    fetch_v6: fn(Request) -> Response,
 }
 
 impl Client {
     pub fn new() -> Self {
-        Self { fetch: Self::get }
+        Self { fetch_v4: Self::get, fetch_v6: Self::get }
     }
 
     // mocked
@@ -19,8 +20,18 @@ impl Client {
         request.call()
     }
 
+    #[cfg(test)]
+    pub fn set_fetch_v4(&mut self, fetch: fn(Request) -> Response) {
+        self.fetch_v4 = fetch;
+    }
+
+    #[cfg(test)]
+    pub fn set_fetch_v6(&mut self, fetch: fn(Request) -> Response) {
+        self.fetch_v6 = fetch;
+    }
+
     pub fn v4(self) -> anyhow::Result<Ipv4Addr> {
-        let response = (self.fetch)(ureq::get("https://ip4only.me/api/"));
+        let response = (self.fetch_v4)(ureq::get("https://ip4only.me/api/"));
 
         if response.status() != 200 {
             anyhow::bail!("failed to fetch IPv4 from API - {} {}", response.status(), response.status_text());
@@ -33,7 +44,7 @@ impl Client {
     }
 
     pub fn v6(self) -> anyhow::Result<Ipv6Addr> {
-        let response = (self.fetch)(ureq::get("https://ip6only.me/api/"));
+        let response = (self.fetch_v6)(ureq::get("https://ip6only.me/api/"));
 
         if response.status() != 200 {
             anyhow::bail!("failed to fetch IPv6 from API - {} {}", response.status(), response.status_text());
@@ -47,24 +58,24 @@ impl Client {
 }
 
 #[cfg(test)]
-mod tests {
+pub mod tests {
     use crate::api;
     use anyhow::Context;
     use std::net::{Ipv4Addr, Ipv6Addr};
     use ureq::{Request, Response};
 
-    fn mock_v4(_: Request) -> Response {
+    pub fn mock_v4(_: Request) -> Response {
         Response::new(200, "OK", include_str!("../../resources/tests/ip/v4.csv"))
     }
 
-    fn mock_v6(_: Request) -> Response {
+    pub fn mock_v6(_: Request) -> Response {
         Response::new(200, "OK", include_str!("../../resources/tests/ip/v6.csv"))
     }
 
     #[test]
     fn v4() -> anyhow::Result<()> {
         let mut client = api::ip::Client::new();
-        client.fetch = mock_v4;
+        client.fetch_v4 = mock_v4;
 
         assert_eq!(client.v4().context("failed to fetch mock IPv4 address")?, Ipv4Addr::LOCALHOST);
 
@@ -74,7 +85,7 @@ mod tests {
     #[test]
     fn v6() -> anyhow::Result<()> {
         let mut client = api::ip::Client::new();
-        client.fetch = mock_v6;
+        client.fetch_v6 = mock_v6;
 
         assert_eq!(client.v6().context("failed to fetch mock IPv6 address")?, Ipv6Addr::LOCALHOST);
 

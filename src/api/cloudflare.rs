@@ -9,13 +9,14 @@ use ureq::{json, Request, Response, SerdeValue};
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 pub struct Client<'a> {
     api_token: &'a str,
-    fetch: fn(Request) -> Response,
-    update: fn(Request, SerdeValue) -> Response,
+    get_zone: fn(Request) -> Response,
+    get_dns_record: fn(Request) -> Response,
+    patch_dns_record: fn(Request, SerdeValue) -> Response,
 }
 
 impl<'a> Client<'a> {
     pub fn new(api_token: &'a str) -> Self {
-        Self { api_token, fetch: Self::get, update: Self::patch }
+        Self { api_token, get_zone: Self::get, get_dns_record: Self::get, patch_dns_record: Self::patch }
     }
 
     // mocked
@@ -30,13 +31,28 @@ impl<'a> Client<'a> {
         request.send_json(json)
     }
 
+    #[cfg(test)]
+    pub fn set_get_zone(&mut self, get_zone: fn(Request) -> Response) {
+        self.get_zone = get_zone;
+    }
+
+    #[cfg(test)]
+    pub fn set_get_dns_record(&mut self, get_dns_record: fn(Request) -> Response) {
+        self.get_dns_record = get_dns_record;
+    }
+
+    #[cfg(test)]
+    pub fn set_patch_dns_record(&mut self, patch_dns_record: fn(Request, SerdeValue) -> Response) {
+        self.patch_dns_record = patch_dns_record;
+    }
+
     pub fn fetch_zone(&self, zone: &str) -> anyhow::Result<Zone> {
         let mut request = ureq::get("https://api.cloudflare.com/client/v4/zones");
         request
             .query("name", zone)
             .set("content-type", "application/json")
             .set("authorization", &format!("Bearer {}", self.api_token));
-        let response = (self.fetch)(request);
+        let response = (self.get_zone)(request);
 
         let mut body: ApiResponse<Zone> =
             response.into_json_deserialize().context("failed to parse Zones JSON response")?;
@@ -79,7 +95,7 @@ impl<'a> Client<'a> {
             .query("type", &dns_record_type.to_string())
             .set("content-type", "application/json")
             .set("authorization", &format!("Bearer {}", self.api_token));
-        let response = (self.fetch)(request);
+        let response = (self.get_dns_record)(request);
 
         let mut body: ApiResponse<DnsRecord> =
             response.into_json_deserialize().context("failed to parse DNS Records JSON response")?;
@@ -117,7 +133,7 @@ impl<'a> Client<'a> {
             identifier = dns_record_id
         ));
         request.set("content-type", "application/json").set("authorization", &format!("Bearer {}", self.api_token));
-        let response = (self.update)(request, json!({ "content": ip }));
+        let response = (self.patch_dns_record)(request, json!({ "content": ip }));
 
         let body: ApiResponse<DnsRecord> =
             response.into_json_deserialize().context("failed to parse DNS Records update JSON response")?;
@@ -218,7 +234,7 @@ impl Display for DnsRecordType {
 }
 
 #[cfg(test)]
-mod tests {
+pub mod tests {
     use crate::api;
     use crate::api::cloudflare::{DnsRecord, DnsRecordType, Zone};
     use anyhow::Context;
@@ -241,22 +257,22 @@ mod tests {
         DnsRecord { id: DNS_RECORD_ID.to_string(), locked: false, content: IpAddr::V4(Ipv4Addr::new(198, 51, 100, 4)) }
     }
 
-    fn mock_zone(_: Request) -> Response {
+    pub fn mock_zone(_: Request) -> Response {
         Response::new(200, "OK", include_str!("../../resources/tests/cloudflare/zone.json"))
     }
 
-    fn mock_dns_record(_: Request) -> Response {
+    pub fn mock_dns_record(_: Request) -> Response {
         Response::new(200, "OK", include_str!("../../resources/tests/cloudflare/dns_record.json"))
     }
 
-    fn mock_dns_record_update(_: Request, _: SerdeValue) -> Response {
+    pub fn mock_dns_record_update(_: Request, _: SerdeValue) -> Response {
         Response::new(200, "OK", include_str!("../../resources/tests/cloudflare/dns_record.json"))
     }
 
     #[test]
     fn fetch_zone() -> anyhow::Result<()> {
         let mut client = api::cloudflare::Client::new(API_TOKEN);
-        client.fetch = mock_zone;
+        client.get_zone = mock_zone;
 
         assert_eq!(client.fetch_zone("example.com").context("failed to fetch mock Zone")?, ZONE());
 
@@ -266,7 +282,7 @@ mod tests {
     #[test]
     fn fetch_dns_record() -> anyhow::Result<()> {
         let mut client = api::cloudflare::Client::new(API_TOKEN);
-        client.fetch = mock_dns_record;
+        client.get_dns_record = mock_dns_record;
 
         assert_eq!(
             client
@@ -281,7 +297,7 @@ mod tests {
     #[test]
     fn update_dns_record() -> anyhow::Result<()> {
         let mut client = api::cloudflare::Client::new(API_TOKEN);
-        client.update = mock_dns_record_update;
+        client.patch_dns_record = mock_dns_record_update;
 
         assert_eq!(
             client

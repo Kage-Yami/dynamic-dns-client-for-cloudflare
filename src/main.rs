@@ -62,6 +62,13 @@ fn main() -> anyhow::Result<()> {
     }
 
     let cloudflare = api::cloudflare::Client::new(config.api_token());
+    let ip = api::ip::Client::new();
+
+    update(&config, cloudflare, ip)
+}
+
+#[doc(hidden)]
+fn update(config: &Config, cloudflare: api::cloudflare::Client, ip: api::ip::Client) -> anyhow::Result<()> {
     let zone = cloudflare.fetch_zone(config.zone()).context("failed to fetch DNS Zone")?;
 
     let ipv4 = if config.only_v6() {
@@ -70,7 +77,7 @@ fn main() -> anyhow::Result<()> {
         let record = cloudflare
             .fetch_dns_record(zone.id(), config.domain(), DnsRecordType::A)
             .context("failed to fetch DNS A Record")?;
-        let ip = api::ip::Client::new().v4().context("failed to fetch IPv4 address")?;
+        let ip = ip.v4().context("failed to fetch IPv4 address")?;
 
         if record.content() == ip {
             println!("A Record already matches desired IPv4; skipping...");
@@ -89,7 +96,7 @@ fn main() -> anyhow::Result<()> {
         let record = cloudflare
             .fetch_dns_record(zone.id(), config.domain(), DnsRecordType::AAAA)
             .context("failed to fetch DNS AAAA Record")?;
-        let ip = api::ip::Client::new().v6().context("failed to fetch IPv6 address")?;
+        let ip = ip.v6().context("failed to fetch IPv6 address")?;
 
         if record.content() == ip {
             println!("AAAA Record already matches desired IPv6; skipping...");
@@ -119,4 +126,66 @@ fn main() -> anyhow::Result<()> {
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::api::cloudflare::tests::{mock_dns_record, mock_dns_record_update, mock_zone};
+    use crate::api::ip::tests::{mock_v4, mock_v6};
+    use crate::config::Config;
+    use crate::{api, update};
+
+    // Not an actual token; taken directly from the API documentation
+    const API_TOKEN: &str = "YQSn-xWAQiiEh9qM58wZNnyQS7FUdoqGIUAbrh7T";
+
+    #[test]
+    fn update_mocked() -> anyhow::Result<()> {
+        let config = Config::new("example.com", "example.com", API_TOKEN, false, false);
+
+        let mut cloudflare = api::cloudflare::Client::new(config.api_token());
+        let mut ip = api::ip::Client::new();
+
+        cloudflare.set_get_zone(mock_zone);
+        cloudflare.set_get_dns_record(mock_dns_record);
+        cloudflare.set_patch_dns_record(mock_dns_record_update);
+
+        ip.set_fetch_v4(mock_v4);
+        ip.set_fetch_v6(mock_v6);
+
+        update(&config, cloudflare, ip)
+    }
+
+    #[test]
+    fn update_mocked_v4_only() -> anyhow::Result<()> {
+        let config = Config::new("example.com", "example.com", API_TOKEN, true, false);
+
+        let mut cloudflare = api::cloudflare::Client::new(config.api_token());
+        let mut ip = api::ip::Client::new();
+
+        cloudflare.set_get_zone(mock_zone);
+        cloudflare.set_get_dns_record(mock_dns_record);
+        cloudflare.set_patch_dns_record(mock_dns_record_update);
+
+        ip.set_fetch_v4(mock_v4);
+        ip.set_fetch_v6(mock_v6);
+
+        update(&config, cloudflare, ip)
+    }
+
+    #[test]
+    fn update_mocked_v6_only() -> anyhow::Result<()> {
+        let config = Config::new("example.com", "example.com", API_TOKEN, false, true);
+
+        let mut cloudflare = api::cloudflare::Client::new(config.api_token());
+        let mut ip = api::ip::Client::new();
+
+        cloudflare.set_get_zone(mock_zone);
+        cloudflare.set_get_dns_record(mock_dns_record);
+        cloudflare.set_patch_dns_record(mock_dns_record_update);
+
+        ip.set_fetch_v4(mock_v4);
+        ip.set_fetch_v6(mock_v6);
+
+        update(&config, cloudflare, ip)
+    }
 }
