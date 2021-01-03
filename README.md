@@ -5,8 +5,9 @@
   - [Repository information](#repository-information)
 - [Usage](#usage)
   - [Once-off update](#once-off-update)
-  - [Recurring - Windows](#recurring---windows)
-  - [Recurring - Linux (`systemd`)](#recurring---linux-systemd)
+  - [Recurring](#recurring)
+    - [Windows](#windows)
+    - [Linux - `systemd`](#linux---systemd)
 - [Attributions](#attributions)
 
 ## Overview
@@ -58,11 +59,36 @@ Linux:
 
 To only update the A or AAAA record, additionally pass in the `--only-v4` or `--only-v6` switches, respectively.
 
-### Recurring - Windows
+### Recurring
 
-_To be documented..._
+Note that Cloudflare applies a rate limit of 1,200 requests per 5 minutes; this utility makes a total of 5 API calls per execution. For comparison, running the utility every second for 5 minutes would theoretically result in 1,500 requests.
 
-### Recurring - Linux (`systemd`)
+#### Windows
+
+To execute the utility on a recurring basis in Windows, simply add a scheduled task; a suggested trigger is "on a *daily* schedule" and "repeat task every *1 hour* for a duration of *1 day*".
+
+You'll probably also want to log the output, setting the scheduled task to the following command will accomplish this:
+
+```powershell
+powershell.exe -NonInteractive -Command "./ddns-for-cloudflare.exe --zone $ZoneName --domain #DomainName --api-token $ApiToken *> $LogPath/$((Get-Date).ToString('yyyy-MM-dd HH-mm-ss')).log"
+```
+
+For convenience, the following PowerShell script can add this scheduled task for you; save it, replace the variables within `$Action` as needed, and then run it with admin rights:
+
+```powershell
+$Action = New-ScheduledTaskAction -Execute "Powershell.exe" `
+    -Argument "-NonInteractive -Command `"$ExecutablePath\ddns-for-cloudflare.exe --zone '$ZoneName' --domain '$DomainName' --api-token '$ApiToken' *> $LogPath\`$((Get-Date).ToString('yyyy-MM-dd HH-mm-ss')).log`""
+
+$Trigger = New-ScheduledTaskTrigger -Daily -At 9am
+$TriggerRepeat = New-ScheduledTaskTrigger -Once -At 9am `
+    -RepetitionInterval $(New-TimeSpan -Hours 1) `
+    -RepetitionDuration $(New-Timespan -Days 1)
+$Trigger.Repetition = $TriggerRepeat.Repetition
+
+Register-ScheduledTask -Action $Action -Trigger $Trigger -TaskName "Dynamic DNS Client for Cloudflare" -TaskPath "Custom"
+```
+
+#### Linux - `systemd`
 
 _To be documented..._
 
