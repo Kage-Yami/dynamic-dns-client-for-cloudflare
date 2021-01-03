@@ -48,13 +48,13 @@ To initiate a DNS record update, simply execute the utility like so:
 Windows:
 
 ```powershell
-./ddns-for-cloudflare.exe --zone $ZoneName --domain $DomainName --api-token $ApiToken
+./ddns-for-cloudflare.exe --zone "$ZoneName" --domain "$DomainName" --api-token "$ApiToken"
 ```
 
 Linux:
 
 ```sh
-./ddns-for-cloudflare --zone $zone_name --domain $domain_name --api-token $api_token
+./ddns-for-cloudflare --zone "$zone_name" --domain "$domain_name" --api-token "$api_token"
 ```
 
 To only update the A or AAAA record, additionally pass in the `--only-v4` or `--only-v6` switches, respectively.
@@ -70,7 +70,7 @@ To execute the utility on a recurring basis in Windows, simply add a scheduled t
 You'll probably also want to log the output, setting the scheduled task to the following command will accomplish this:
 
 ```powershell
-powershell.exe -NonInteractive -Command "./ddns-for-cloudflare.exe --zone $ZoneName --domain #DomainName --api-token $ApiToken *> $LogPath/$((Get-Date).ToString('yyyy-MM-dd HH-mm-ss')).log"
+powershell.exe -NonInteractive -Command "./ddns-for-cloudflare.exe --zone '$ZoneName' --domain '$DomainName' --api-token '$ApiToken' *> $LogPath/$((Get-Date).ToString('yyyy-MM-dd HH-mm-ss')).log"
 ```
 
 For convenience, the following PowerShell script can add this scheduled task for you; save it, replace the variables within `$Action` as needed, and then run it with admin rights:
@@ -90,7 +90,41 @@ Register-ScheduledTask -Action $Action -Trigger $Trigger -TaskName "Dynamic DNS 
 
 #### Linux - `systemd`
 
-_To be documented..._
+With the following `systemd` units, you can execute the utility on a recurring basis in Linux:
+
+```ini
+[Unit]
+Description=Dynamic DNS Client for Cloudflare
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=$executable_path/ddns-for-cloudflare --zone "$zone_name" --domain "$domain_name" --api-token "$api_token"
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Save the above to `~/.config/systemd/user/ddns-for-cloudflare.service` and update the placeholders as needed.
+
+```ini
+[Unit]
+Description=Dynamic DNS Client for Cloudflare - Timer
+
+[Timer]
+OnBootSec=30s
+OnUnitActiveSec=30m
+
+[Install]
+WantedBy=timers.target
+```
+
+Save the above to `~/.config/systemd/user/ddns-for-cloudflare.timer`, and then run the following to enable it:
+
+```sh
+systemctl --user daemon-reload
+systemctl --user enable --now ddns-for-cloudflare.timer
+```
 
 ## Attributions
 

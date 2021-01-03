@@ -23,8 +23,7 @@
 //!
 //! **_This tool has been developed by an unaffiliated third-party, and is not endorsed or supported by Cloudflare._**
 //!
-//! A CLI utility to update the A and AAAA DNS records of a domain managed by Cloudflare, from the executing system's
-//! current public IP address (written in Rust).
+//! A CLI utility to update the A and AAAA DNS records of a domain managed by Cloudflare, from the executing system's current public IP address (written in Rust).
 //!
 //! [![Crates.io version](https://img.shields.io/crates/v/dynamic-dns-client-for-cloudflare?style=for-the-badge)](https://docs.rs/dynamic-dns-client-for-cloudflare/latest/dynamic-dns-client-for-cloudflare/)
 //! [![Crates.io downloads](https://img.shields.io/crates/d/dynamic-dns-client-for-cloudflare?style=for-the-badge)](https://crates.io/crates/dynamic-dns-client-for-cloudflare)
@@ -44,8 +43,7 @@
 //!
 //! ## Usage
 //!
-//! **It is _strongly_ recommended that a specialised API token is used only for this. This will reduce the scope of any
-//! damage if it were to leak, and reduce the impact when cycling the token.**
+//! **It is _strongly_ recommended that a specialised API token is used only for this. This will reduce the scope of any damage if it were to leak, and reduce the impact when cycling the token.**
 //!
 //! The permissions required are:
 //! - `#zone:read`
@@ -59,36 +57,32 @@
 //! Windows:
 //!
 //! ```powershell
-//! ./ddns-for-cloudflare.exe --zone $ZoneName --domain $DomainName --api-token $ApiToken
+//! ./ddns-for-cloudflare.exe --zone "$ZoneName" --domain "$DomainName" --api-token "$ApiToken"
 //! ```
 //!
 //! Linux:
 //!
 //! ```sh
-//! ./ddns-for-cloudflare --zone $zone_name --domain $domain_name --api-token $api_token
+//! ./ddns-for-cloudflare --zone "$zone_name" --domain "$domain_name" --api-token "$api_token"
 //! ```
 //!
 //! To only update the A or AAAA record, additionally pass in the `--only-v4` or `--only-v6` switches, respectively.
 //!
 //! ### Recurring
 //!
-//! Note that Cloudflare applies a rate limit of 1,200 requests per 5 minutes; this utility makes a total of 5 API calls
-//! per execution. For comparison, running the utility every second for 5 minutes would theoretically result in 1,500 requests.
+//! Note that Cloudflare applies a rate limit of 1,200 requests per 5 minutes; this utility makes a total of 5 API calls per execution. For comparison, running the utility every second for 5 minutes would theoretically result in 1,500 requests.
 //!
 //! #### Windows
 //!
-//! To execute the utility on a recurring basis in Windows, simply add a scheduled task; a suggested trigger is "on a
-//! *daily* schedule" and "repeat task every *1 hour* for a duration of *1 day*".
+//! To execute the utility on a recurring basis in Windows, simply add a scheduled task; a suggested trigger is "on a *daily* schedule" and "repeat task every *1 hour* for a duration of *1 day*".
 //!
-//! You'll probably also want to log the output, setting the scheduled task to the following command will accomplish
-//! this:
+//! You'll probably also want to log the output, setting the scheduled task to the following command will accomplish this:
 //!
 //! ```powershell
-//! powershell.exe -NonInteractive -Command "./ddns-for-cloudflare.exe --zone $ZoneName --domain #DomainName --api-token $ApiToken *> $LogPath/$((Get-Date).ToString('yyyy-MM-dd HH-mm-ss')).log"
+//! powershell.exe -NonInteractive -Command "./ddns-for-cloudflare.exe --zone '$ZoneName' --domain '$DomainName' --api-token '$ApiToken' *> $LogPath/$((Get-Date).ToString('yyyy-MM-dd HH-mm-ss')).log"
 //! ```
 //!
-//! For convenience, the following PowerShell script can add this scheduled task for you; save it, replace the variables
-//! within `$Action` as needed, and then run it with admin rights:
+//! For convenience, the following PowerShell script can add this scheduled task for you; save it, replace the variables within `$Action` as needed, and then run it with admin rights:
 //!
 //! ```powershell
 //! $Action = New-ScheduledTaskAction -Execute "Powershell.exe" `
@@ -105,7 +99,41 @@
 //!
 //! #### Linux - `systemd`
 //!
-//! _To be documented..._
+//! With the following `systemd` units, you can execute the utility on a recurring basis in Linux:
+//!
+//! ```ini
+//! [Unit]
+//! Description=Dynamic DNS Client for Cloudflare
+//! After=network.target
+//!
+//! [Service]
+//! Type=oneshot
+//! ExecStart=$executable_path/ddns-for-cloudflare --zone "$zone_name" --domain "$domain_name" --api-token "$api_token"
+//!
+//! [Install]
+//! WantedBy=multi-user.target
+//! ```
+//!
+//! Save the above to `~/.config/systemd/user/ddns-for-cloudflare.service` and update the placeholders as needed.
+//!
+//! ```ini
+//! [Unit]
+//! Description=Dynamic DNS Client for Cloudflare - Timer
+//!
+//! [Timer]
+//! OnBootSec=30s
+//! OnUnitActiveSec=30m
+//!
+//! [Install]
+//! WantedBy=timers.target
+//! ```
+//!
+//! Save the above to `~/.config/systemd/user/ddns-for-cloudflare.timer`, and then run the following to enable it:
+//!
+//! ```sh
+//! systemctl --user daemon-reload
+//! systemctl --user enable --now ddns-for-cloudflare.timer
+//! ```
 //!
 //! ## Attributions
 //!
