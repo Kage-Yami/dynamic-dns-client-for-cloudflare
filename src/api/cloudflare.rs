@@ -212,3 +212,80 @@ impl Display for DnsRecordType {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::api;
+    use crate::api::cloudflare::{DnsRecord, DnsRecordType, Zone};
+    use anyhow::Context;
+    use std::net::{IpAddr, Ipv4Addr};
+    use ureq::{Request, Response, SerdeValue};
+
+    // Not an actual token; taken directly from the API documentation
+    const API_TOKEN: &str = "YQSn-xWAQiiEh9qM58wZNnyQS7FUdoqGIUAbrh7T";
+
+    const ZONE_ID: &str = "023e105f4ecef8ad9ca31a8372d0c353";
+    const DNS_RECORD_ID: &str = "372e67954025e0ba6aaa6d586b9e0b59";
+
+    #[allow(non_snake_case)]
+    fn ZONE() -> Zone {
+        Zone { id: ZONE_ID.to_string() }
+    }
+
+    #[allow(non_snake_case)]
+    fn DNS_RECORD() -> DnsRecord {
+        DnsRecord { id: DNS_RECORD_ID.to_string(), locked: false, content: IpAddr::V4(Ipv4Addr::new(198, 51, 100, 4)) }
+    }
+
+    fn mock_zone(_: Request) -> Response {
+        Response::new(200, "OK", include_str!("../../resources/tests/cloudflare/zone.json"))
+    }
+
+    fn mock_dns_record(_: Request) -> Response {
+        Response::new(200, "OK", include_str!("../../resources/tests/cloudflare/dns_record.json"))
+    }
+
+    fn mock_dns_record_update(_: Request, _: SerdeValue) -> Response {
+        Response::new(200, "OK", include_str!("../../resources/tests/cloudflare/dns_record.json"))
+    }
+
+    #[test]
+    fn fetch_zone() -> anyhow::Result<()> {
+        let mut client = api::cloudflare::Client::new(API_TOKEN);
+        client.fetch = mock_zone;
+
+        assert_eq!(client.fetch_zone("example.com").context("failed to fetch mock Zone")?, ZONE());
+
+        Ok(())
+    }
+
+    #[test]
+    fn fetch_dns_record() -> anyhow::Result<()> {
+        let mut client = api::cloudflare::Client::new(API_TOKEN);
+        client.fetch = mock_dns_record;
+
+        assert_eq!(
+            client
+                .fetch_dns_record(ZONE_ID, "example.com", DnsRecordType::A)
+                .context("failed to fetch mock DNS Record")?,
+            DNS_RECORD()
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn update_dns_record() -> anyhow::Result<()> {
+        let mut client = api::cloudflare::Client::new(API_TOKEN);
+        client.update = mock_dns_record_update;
+
+        assert_eq!(
+            client
+                .update_dns_record(ZONE_ID, DNS_RECORD_ID, IpAddr::V4(Ipv4Addr::LOCALHOST))
+                .context("failed to update mock DNS Record")?,
+            ()
+        );
+
+        Ok(())
+    }
+}

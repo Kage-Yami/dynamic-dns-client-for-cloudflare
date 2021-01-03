@@ -51,20 +51,20 @@ mod tests {
     use std::net::{Ipv4Addr, Ipv6Addr};
     use ureq::{Request, Response};
 
-    fn get_mock_v4(_: Request) -> Response {
+    fn mock_v4(_: Request) -> Response {
         Response::new(200, "OK", include_str!("../../resources/tests/ip/v4.csv"))
     }
 
-    fn get_mock_v6(_: Request) -> Response {
+    fn mock_v6(_: Request) -> Response {
         Response::new(200, "OK", include_str!("../../resources/tests/ip/v6.csv"))
     }
 
     #[test]
     fn v4() -> anyhow::Result<()> {
         let mut client = api::ip::Client::new();
-        client.fetch = get_mock_v4;
+        client.fetch = mock_v4;
 
-        assert_eq!(client.v4().context("failed to get mock IPv4 address")?, Ipv4Addr::LOCALHOST);
+        assert_eq!(client.v4().context("failed to fetch mock IPv4 address")?, Ipv4Addr::LOCALHOST);
 
         Ok(())
     }
@@ -72,9 +72,9 @@ mod tests {
     #[test]
     fn v6() -> anyhow::Result<()> {
         let mut client = api::ip::Client::new();
-        client.fetch = get_mock_v6;
+        client.fetch = mock_v6;
 
-        assert_eq!(client.v6().context("failed to get mock IPv6 address")?, Ipv6Addr::LOCALHOST);
+        assert_eq!(client.v6().context("failed to fetch mock IPv6 address")?, Ipv6Addr::LOCALHOST);
 
         Ok(())
     }
