@@ -53,7 +53,9 @@ mod api;
 #[doc(hidden)]
 mod config;
 
+// mocked
 #[doc(hidden)]
+#[cfg(not(tarpaulin_include))]
 fn main() -> anyhow::Result<()> {
     let config: Config = argh::from_env();
 
