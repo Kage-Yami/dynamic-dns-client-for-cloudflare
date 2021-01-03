@@ -1,2 +1,5 @@
+pub use ip::Ip;
+
 pub mod cloudflare;
-pub mod ip;
+
+mod ip;

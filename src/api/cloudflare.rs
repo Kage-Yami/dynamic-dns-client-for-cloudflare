@@ -4,24 +4,35 @@ use std::error::Error;
 use std::fmt;
 use std::fmt::{Display, Formatter};
 use std::net::IpAddr;
-use ureq::json;
+use ureq::{json, Request, Response, SerdeValue};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 pub struct Client<'a> {
     api_token: &'a str,
+    fetch: fn(Request) -> Response,
+    update: fn(Request, SerdeValue) -> Response,
 }
 
 impl<'a> Client<'a> {
-    pub const fn new(api_token: &'a str) -> Self {
-        Self { api_token }
+    pub fn new(api_token: &'a str) -> Self {
+        Self { api_token, fetch: Self::get, update: Self::patch }
+    }
+
+    fn get(mut request: Request) -> Response {
+        request.call()
+    }
+
+    fn patch(mut request: Request, json: SerdeValue) -> Response {
+        request.send_json(json)
     }
 
     pub fn fetch_zone(&self, zone: &str) -> anyhow::Result<Zone> {
-        let response = ureq::get("https://api.cloudflare.com/client/v4/zones")
+        let mut request = ureq::get("https://api.cloudflare.com/client/v4/zones");
+        request
             .query("name", zone)
             .set("content-type", "application/json")
-            .set("authorization", &format!("Bearer {}", self.api_token))
-            .call();
+            .set("authorization", &format!("Bearer {}", self.api_token));
+        let response = (self.fetch)(request);
 
         let mut body: ApiResponse<Zone> =
             response.into_json_deserialize().context("failed to parse Zones JSON response")?;
@@ -55,15 +66,16 @@ impl<'a> Client<'a> {
         dns_record: &str,
         dns_record_type: DnsRecordType,
     ) -> anyhow::Result<DnsRecord> {
-        let response = ureq::get(&format!(
+        let mut request = ureq::get(&format!(
             "https://api.cloudflare.com/client/v4/zones/{zone_identifier}/dns/records",
             zone_identifier = zone_id
-        ))
-        .query("name", dns_record)
-        .query("type", &dns_record_type.to_string())
-        .set("content-type", "application/json")
-        .set("authorization", &format!("Bearer {}", self.api_token))
-        .call();
+        ));
+        request
+            .query("name", dns_record)
+            .query("type", &dns_record_type.to_string())
+            .set("content-type", "application/json")
+            .set("authorization", &format!("Bearer {}", self.api_token));
+        let response = (self.fetch)(request);
 
         let mut body: ApiResponse<DnsRecord> =
             response.into_json_deserialize().context("failed to parse DNS Records JSON response")?;
@@ -95,14 +107,13 @@ impl<'a> Client<'a> {
     }
 
     pub fn update_dns_record(&self, zone_id: &str, dns_record_id: &str, ip: IpAddr) -> anyhow::Result<()> {
-        let response = ureq::patch(&format!(
+        let mut request = ureq::patch(&format!(
             "https://api.cloudflare.com/client/v4/zones/{zone_identifier}/dns/records/{identifier}",
             zone_identifier = zone_id,
             identifier = dns_record_id
-        ))
-        .set("content-type", "application/json")
-        .set("authorization", &format!("Bearer {}", self.api_token))
-        .send_json(json!({ "content": ip }));
+        ));
+        request.set("content-type", "application/json").set("authorization", &format!("Bearer {}", self.api_token));
+        let response = (self.update)(request, json!({ "content": ip }));
 
         let body: ApiResponse<DnsRecord> =
             response.into_json_deserialize().context("failed to parse DNS Records update JSON response")?;
