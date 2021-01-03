@@ -17,7 +17,7 @@ impl Client {
         request.call()
     }
 
-    pub fn v4(&self) -> anyhow::Result<Ipv4Addr> {
+    pub fn v4(self) -> anyhow::Result<Ipv4Addr> {
         let response = (self.fetch)(ureq::get("https://ip4only.me/api/"));
 
         if response.status() != 200 {
@@ -30,7 +30,7 @@ impl Client {
         Ipv4Addr::from_str(ip).context("failed to parse IPv4 address")
     }
 
-    pub fn v6(&self) -> anyhow::Result<Ipv6Addr> {
+    pub fn v6(self) -> anyhow::Result<Ipv6Addr> {
         let response = (self.fetch)(ureq::get("https://ip6only.me/api/"));
 
         if response.status() != 200 {
