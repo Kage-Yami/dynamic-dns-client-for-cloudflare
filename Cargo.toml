@@ -10,7 +10,7 @@ readme = "README.md"
 keywords = ["cli", "utility", "dns", "cloudflare"]
 categories = ["command-line-utilities"]
 
-include = ["src/*", "tests/*", "Cargo.toml", "CHANGELOG.md", "LICENSE", "README.md"]
+include = ["resources/*", "src/*", "tests/*", "Cargo.toml", "CHANGELOG.md", "LICENSE", "README.md"]
 
 publish = false
 

@@ -70,7 +70,7 @@ fn main() -> anyhow::Result<()> {
         let record = cloudflare
             .fetch_dns_record(zone.id(), config.domain(), DnsRecordType::A)
             .context("failed to fetch DNS A Record")?;
-        let ip = api::Ip::new().v4().context("failed to fetch IPv4 address")?;
+        let ip = api::ip::Client::new().v4().context("failed to fetch IPv4 address")?;
 
         if record.content() == ip {
             println!("A Record already matches desired IPv4; skipping...");
@@ -89,7 +89,7 @@ fn main() -> anyhow::Result<()> {
         let record = cloudflare
             .fetch_dns_record(zone.id(), config.domain(), DnsRecordType::AAAA)
             .context("failed to fetch DNS AAAA Record")?;
-        let ip = api::Ip::new().v6().context("failed to fetch IPv6 address")?;
+        let ip = api::ip::Client::new().v6().context("failed to fetch IPv6 address")?;
 
         if record.content() == ip {
             println!("AAAA Record already matches desired IPv6; skipping...");
