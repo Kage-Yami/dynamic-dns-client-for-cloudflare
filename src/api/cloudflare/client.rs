@@ -1,8 +1,8 @@
+use crate::api::cloudflare::api_response::ApiResponse;
+use crate::api::cloudflare::dns_record::DnsRecord;
+use crate::api::cloudflare::dns_record_type::DnsRecordType;
+use crate::api::cloudflare::zone::Zone;
 use anyhow::Context;
-use serde::{Deserialize, Serialize};
-use std::error::Error;
-use std::fmt;
-use std::fmt::{Display, Formatter};
 use std::net::IpAddr;
 use ureq::{json, Request, Response, SerdeValue};
 
@@ -42,22 +42,25 @@ impl<'a> Client<'a> {
         let body: ApiResponse<Zone> =
             response.into_json_deserialize().context("failed to parse Zones JSON response")?;
 
-        if !body.errors.is_empty() {
-            if body.errors.len() > 1 {
+        if !body.errors().is_empty() {
+            if body.errors().len() > 1 {
                 eprintln!("Errors returned from Zones API:");
-                for error in &body.errors {
+                for error in body.errors() {
                     eprintln!("- {}", error);
                 }
 
                 // cannot panic; only runs when body.errors.len() > 1
-                anyhow::bail!("Errors returned from Zones API; first one (see stderr for others): {}", body.errors[0]);
+                anyhow::bail!(
+                    "Errors returned from Zones API; first one (see stderr for others): {}",
+                    body.errors()[0]
+                );
             } else {
                 // cannot panic; only runs when body.errors.len() >= 1
-                anyhow::bail!("Error returned from Zones API: {}", body.errors[0]);
+                anyhow::bail!("Error returned from Zones API: {}", body.errors()[0]);
             }
         }
 
-        if let Some(mut result) = body.result {
+        if let Some(mut result) = body.take_result() {
             if result.len() != 1 {
                 anyhow::bail!("Unexpected number of Zone results; should be 1: {}", result.len());
             }
@@ -89,25 +92,25 @@ impl<'a> Client<'a> {
         let body: ApiResponse<DnsRecord> =
             response.into_json_deserialize().context("failed to parse DNS Records JSON response")?;
 
-        if !body.errors.is_empty() {
-            if body.errors.len() > 1 {
+        if !body.errors().is_empty() {
+            if body.errors().len() > 1 {
                 eprintln!("Errors returned from DNS Records API:");
-                for error in &body.errors {
+                for error in body.errors() {
                     eprintln!("- {}", error);
                 }
 
                 // cannot panic; only runs when body.errors.len() > 1
                 anyhow::bail!(
                     "Errors returned from DNS Records API; first one (see stderror for others): {}",
-                    body.errors[0]
+                    body.errors()[0]
                 );
             } else {
                 // cannot panic; only runs with body.errors.len() >= 1
-                anyhow::bail!("Error returned from DNS Records API: {}", body.errors[0]);
+                anyhow::bail!("Error returned from DNS Records API: {}", body.errors()[0]);
             }
         }
 
-        if let Some(mut result) = body.result {
+        if let Some(mut result) = body.take_result() {
             if result.len() != 1 {
                 anyhow::bail!("Unexpected number of DNS Records results; should be 1: {}", result.len());
             }
@@ -131,21 +134,21 @@ impl<'a> Client<'a> {
         let body: ApiResponse<DnsRecord> =
             response.into_json_deserialize().context("failed to parse DNS Records update JSON response")?;
 
-        if !body.errors.is_empty() {
-            if body.errors.len() > 1 {
+        if !body.errors().is_empty() {
+            if body.errors().len() > 1 {
                 eprintln!("Errors returned from DNS Records update API:");
-                for error in &body.errors {
+                for error in body.errors() {
                     eprintln!("- {}", error);
                 }
 
                 // cannot panic; only runs when body.errors.len() > 1
                 anyhow::bail!(
                     "Errors returned from DNS Records update API; first one (see stderror for others): {}",
-                    body.errors[0]
+                    body.errors()[0]
                 );
             } else {
                 // cannot panic; only runs when body.errors.len() >= 1
-                anyhow::bail!("Error returned from DNS Records update API: {}", body.errors[0]);
+                anyhow::bail!("Error returned from DNS Records update API: {}", body.errors()[0]);
             }
         }
 
@@ -168,87 +171,17 @@ impl Client<'_> {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq, Hash)]
-struct ApiResponse<T: ApiResult> {
-    result: Option<Vec<T>>,
-    errors: Vec<ApiError>,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq, Hash)]
-struct ApiError {
-    code: i128,
-    message: String,
-    error_chain: Option<Vec<ApiError>>,
-}
-
-impl Display for ApiError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "{:#?}", self)
-    }
-}
-
-impl Error for ApiError {}
-
-trait ApiResult {}
-
-#[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq, Hash)]
-pub struct Zone {
-    id: String,
-}
-
-impl Zone {
-    pub fn id(&self) -> &str {
-        &self.id
-    }
-}
-
-impl ApiResult for Zone {}
-
-#[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq, Hash)]
-pub struct DnsRecord {
-    id: String,
-    locked: bool,
-    content: IpAddr,
-}
-
-impl DnsRecord {
-    pub fn id(&self) -> &str {
-        &self.id
-    }
-
-    pub const fn locked(&self) -> bool {
-        self.locked
-    }
-
-    pub const fn content(&self) -> IpAddr {
-        self.content
-    }
-}
-
-impl ApiResult for DnsRecord {}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
-pub enum DnsRecordType {
-    A,
-    AAAA,
-}
-
-impl Display for DnsRecordType {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::A => write!(f, "A"),
-            Self::AAAA => write!(f, "AAAA"),
-        }
-    }
-}
-
 #[cfg(test)]
 pub mod tests {
-    use crate::api;
-    use crate::api::cloudflare::{DnsRecord, DnsRecordType, Zone};
-    use anyhow::Context;
     use std::net::{IpAddr, Ipv4Addr};
+
+    use anyhow::Context;
     use ureq::{Request, Response, SerdeValue};
+
+    use crate::api::cloudflare;
+    use crate::api::cloudflare::dns_record::DnsRecord;
+    use crate::api::cloudflare::dns_record_type::DnsRecordType;
+    use crate::api::cloudflare::zone::Zone;
 
     // Not an actual token; taken directly from the API documentation
     const API_TOKEN: &str = "YQSn-xWAQiiEh9qM58wZNnyQS7FUdoqGIUAbrh7T";
@@ -258,33 +191,33 @@ pub mod tests {
 
     #[allow(non_snake_case)]
     fn ZONE() -> Zone {
-        Zone { id: ZONE_ID.to_string() }
+        Zone::new(ZONE_ID)
     }
 
     #[allow(non_snake_case)]
     fn DNS_RECORD() -> DnsRecord {
-        DnsRecord { id: DNS_RECORD_ID.to_string(), locked: false, content: IpAddr::V4(Ipv4Addr::new(198, 51, 100, 4)) }
+        DnsRecord::new(DNS_RECORD_ID, false, IpAddr::V4(Ipv4Addr::new(198, 51, 100, 4)))
     }
 
     pub fn mock_zone(_: Request) -> Response {
-        Response::new(200, "OK", include_str!("../../resources/tests/cloudflare/zone.json"))
+        Response::new(200, "OK", include_str!("../../../resources/tests/cloudflare/zone.json"))
     }
 
     pub fn mock_dns_record(_: Request) -> Response {
-        Response::new(200, "OK", include_str!("../../resources/tests/cloudflare/dns_record.json"))
+        Response::new(200, "OK", include_str!("../../../resources/tests/cloudflare/dns_record.json"))
     }
 
     pub fn mock_dns_record_update(_: Request, _: SerdeValue) -> Response {
-        Response::new(200, "OK", include_str!("../../resources/tests/cloudflare/dns_record.json"))
+        Response::new(200, "OK", include_str!("../../../resources/tests/cloudflare/dns_record.json"))
     }
 
     fn mock_failure(_: Request) -> Response {
-        Response::new(400, "Bad Request", include_str!("../../resources/tests/cloudflare/failure.json"))
+        Response::new(400, "Bad Request", include_str!("../../../resources/tests/cloudflare/failure.json"))
     }
 
     #[test]
     fn fetch_zone() -> anyhow::Result<()> {
-        let mut client = api::cloudflare::Client::new(API_TOKEN);
+        let mut client = cloudflare::client::Client::new(API_TOKEN);
         client.get_zone = mock_zone;
 
         assert_eq!(client.fetch_zone("example.com").context("failed to fetch mock Zone")?, ZONE());
@@ -294,7 +227,7 @@ pub mod tests {
 
     #[test]
     fn fetch_dns_record() -> anyhow::Result<()> {
-        let mut client = api::cloudflare::Client::new(API_TOKEN);
+        let mut client = cloudflare::client::Client::new(API_TOKEN);
         client.get_dns_record = mock_dns_record;
 
         assert_eq!(
@@ -309,7 +242,7 @@ pub mod tests {
 
     #[test]
     fn update_dns_record() -> anyhow::Result<()> {
-        let mut client = api::cloudflare::Client::new(API_TOKEN);
+        let mut client = cloudflare::client::Client::new(API_TOKEN);
         client.patch_dns_record = mock_dns_record_update;
 
         assert_eq!(
@@ -324,12 +257,12 @@ pub mod tests {
 
     #[test]
     fn failure() -> anyhow::Result<()> {
-        let mut client = api::cloudflare::Client::new(API_TOKEN);
+        let mut client = cloudflare::client::Client::new(API_TOKEN);
         client.get_zone = mock_failure;
 
         assert_eq!(
             client.fetch_zone("example.com").unwrap_err().to_string(),
-            include_str!("../../resources/tests/cloudflare/failure.txt").trim()
+            include_str!("../../../resources/tests/cloudflare/failure.txt").trim()
         );
 
         Ok(())
