@@ -26,11 +26,6 @@ pub struct Config {
 }
 
 impl Config {
-    #[cfg(test)]
-    pub fn new(zone: &str, domain: &str, api_token: &str, only_v4: bool, only_v6: bool) -> Self {
-        Config { zone: zone.into(), domain: domain.into(), api_token: api_token.into(), only_v4, only_v6 }
-    }
-
     pub fn zone(&self) -> &str {
         &self.zone
     }
@@ -49,5 +44,12 @@ impl Config {
 
     pub const fn only_v6(&self) -> bool {
         self.only_v6
+    }
+}
+
+#[cfg(test)]
+impl Config {
+    pub fn new(zone: &str, domain: &str, api_token: &str, only_v4: bool, only_v6: bool) -> Self {
+        Config { zone: zone.into(), domain: domain.into(), api_token: api_token.into(), only_v4, only_v6 }
     }
 }

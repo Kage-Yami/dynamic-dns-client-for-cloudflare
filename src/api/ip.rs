@@ -20,16 +20,6 @@ impl Client {
         request.call()
     }
 
-    #[cfg(test)]
-    pub fn set_fetch_v4(&mut self, fetch: fn(Request) -> Response) {
-        self.fetch_v4 = fetch;
-    }
-
-    #[cfg(test)]
-    pub fn set_fetch_v6(&mut self, fetch: fn(Request) -> Response) {
-        self.fetch_v6 = fetch;
-    }
-
     pub fn v4(self) -> anyhow::Result<Ipv4Addr> {
         let response = (self.fetch_v4)(ureq::get("https://ip4only.me/api/"));
 
@@ -54,6 +44,17 @@ impl Client {
         let ip = body.split(',').nth(1).context("failed to read IPv6 from body")?;
 
         Ipv6Addr::from_str(ip).context("failed to parse IPv6 address")
+    }
+}
+
+#[cfg(test)]
+impl Client {
+    pub fn set_fetch_v4(&mut self, fetch: fn(Request) -> Response) {
+        self.fetch_v4 = fetch;
+    }
+
+    pub fn set_fetch_v6(&mut self, fetch: fn(Request) -> Response) {
+        self.fetch_v6 = fetch;
     }
 }
 

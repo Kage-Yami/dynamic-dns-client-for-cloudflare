@@ -31,21 +31,6 @@ impl<'a> Client<'a> {
         request.send_json(json)
     }
 
-    #[cfg(test)]
-    pub fn set_get_zone(&mut self, get_zone: fn(Request) -> Response) {
-        self.get_zone = get_zone;
-    }
-
-    #[cfg(test)]
-    pub fn set_get_dns_record(&mut self, get_dns_record: fn(Request) -> Response) {
-        self.get_dns_record = get_dns_record;
-    }
-
-    #[cfg(test)]
-    pub fn set_patch_dns_record(&mut self, patch_dns_record: fn(Request, SerdeValue) -> Response) {
-        self.patch_dns_record = patch_dns_record;
-    }
-
     pub fn fetch_zone(&self, zone: &str) -> anyhow::Result<Zone> {
         let mut request = ureq::get("https://api.cloudflare.com/client/v4/zones");
         request
@@ -165,6 +150,21 @@ impl<'a> Client<'a> {
         }
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+impl Client<'_> {
+    pub fn set_get_zone(&mut self, get_zone: fn(Request) -> Response) {
+        self.get_zone = get_zone;
+    }
+
+    pub fn set_get_dns_record(&mut self, get_dns_record: fn(Request) -> Response) {
+        self.get_dns_record = get_dns_record;
+    }
+
+    pub fn set_patch_dns_record(&mut self, patch_dns_record: fn(Request, SerdeValue) -> Response) {
+        self.patch_dns_record = patch_dns_record;
     }
 }
 
