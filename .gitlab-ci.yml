@@ -9,12 +9,15 @@ default:
 stages:
   - test
   - check
+  - build
   - publish
 
 cache:
   key: $CI_COMMIT_REF_SLUG.$CI_JOB_NAME
   paths:
     - target
+
+#################################################### JOB TEMPLATES #####################################################
 
 .test: &test
   stage: test
@@ -30,9 +33,16 @@ cache:
       when: on_success
     - when: never
 
+.build: &build
+  stage: build
+
 .publish: &publish
   stage: publish
   rules: *publish-rules
+
+###################################################### TEST JOBS #######################################################
+## These don't run for tagged pipelines (as tests should've already been run when the commit was made).
+########################################################################################################################
 
 test:
   <<: *test
@@ -60,10 +70,28 @@ package:
   script:
     - cargo package
 
+###################################################### BUILD JOBS ######################################################
+## These run for all pipelines (as they're relevant to both untagged and tagged runs).
+########################################################################################################################
+
+linux-aarch64:
+  <<: *build
+  script:
+    - cargo build --target aarch64-unknown-linux-musl
+
+linux-x86_64:
+  <<: *build
+  script:
+    - cargo build --target x86_64-unknown-linux-musl
+
+##################################################### PUBLISH JOBS #####################################################
+## These don't run for untagged pipelines (as there's no point; no additional testing is done).
+########################################################################################################################
+
 version:
   <<: *check
   script:
-    - cargo test --package dataweave --test version html_root_url -- --exact
+    - cargo test --test version html_root_url -- --exact
     - version=$(grep -Eo '^version = "[^"]*"$' Cargo.toml  | sed -E 's|.+ = "([^"]+)"$|\1|')
     - test $version = $CI_COMMIT_TAG
 
