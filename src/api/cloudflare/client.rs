@@ -9,9 +9,9 @@ use ureq::{json, Request, Response, SerdeValue};
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 pub struct Client<'a> {
     api_token: &'a str,
-    get_zone: fn(Request) -> Response,
-    get_dns_record: fn(Request) -> Response,
-    patch_dns_record: fn(Request, SerdeValue) -> Response,
+    get_zone: fn(Request) -> Result<Response, ureq::Error>,
+    get_dns_record: fn(Request) -> Result<Response, ureq::Error>,
+    patch_dns_record: fn(Request, SerdeValue) -> Result<Response, ureq::Error>,
 }
 
 impl<'a> Client<'a> {
@@ -21,54 +21,59 @@ impl<'a> Client<'a> {
 
     // mocked
     #[cfg(not(tarpaulin_include))]
-    fn get(mut request: Request) -> Response {
+    fn get(request: Request) -> Result<Response, ureq::Error> {
         request.call()
     }
 
     // mocked
     #[cfg(not(tarpaulin_include))]
-    fn patch(mut request: Request, json: SerdeValue) -> Response {
+    fn patch(request: Request, json: SerdeValue) -> Result<Response, ureq::Error> {
         request.send_json(json)
     }
 
     pub fn fetch_zone(&self, zone: &str) -> anyhow::Result<Zone> {
-        let mut request = ureq::get("https://api.cloudflare.com/client/v4/zones");
-        request
+        let request = ureq::get("https://api.cloudflare.com/client/v4/zones")
             .query("name", zone)
             .set("content-type", "application/json")
             .set("authorization", &format!("Bearer {}", self.api_token));
-        let response = (self.get_zone)(request);
 
-        let body: ApiResponseCollection<Zone> =
-            response.into_json_deserialize().context("failed to parse Zones JSON response")?;
+        match (self.get_zone)(request) {
+            Ok(response) | Err(ureq::Error::Status(_, response)) => {
+                let body: ApiResponseCollection<Zone> =
+                    response.into_json().context("failed to parse Zones JSON response")?;
 
-        if !body.errors().is_empty() {
-            if body.errors().len() > 1 {
-                eprintln!("Errors returned from Zones API:");
-                for error in body.errors() {
-                    eprintln!("- {}", error);
+                if !body.errors().is_empty() {
+                    if body.errors().len() > 1 {
+                        eprintln!("Errors returned from Zones API:");
+                        for error in body.errors() {
+                            eprintln!("- {}", error);
+                        }
+
+                        // cannot panic; only runs when body.errors.len() > 1
+                        anyhow::bail!(
+                            "Errors returned from Zones API; first one (see stderr for others): {}",
+                            body.errors()[0]
+                        );
+                    } else {
+                        // cannot panic; only runs when body.errors.len() >= 1
+                        anyhow::bail!("Error returned from Zones API: {}", body.errors()[0]);
+                    }
                 }
 
-                // cannot panic; only runs when body.errors.len() > 1
-                anyhow::bail!(
-                    "Errors returned from Zones API; first one (see stderr for others): {}",
-                    body.errors()[0]
-                );
-            } else {
-                // cannot panic; only runs when body.errors.len() >= 1
-                anyhow::bail!("Error returned from Zones API: {}", body.errors()[0]);
-            }
-        }
+                if let Some(mut result) = body.take_result() {
+                    if result.len() != 1 {
+                        anyhow::bail!("Unexpected number of Zone results; should be 1: {}", result.len());
+                    }
 
-        if let Some(mut result) = body.take_result() {
-            if result.len() != 1 {
-                anyhow::bail!("Unexpected number of Zone results; should be 1: {}", result.len());
+                    // cannot panic; only runs when result.len() == 1
+                    Ok(result.swap_remove(0))
+                } else {
+                    anyhow::bail!("Zone results is unexpectedly empty; should be 1 result");
+                }
             }
-
-            // cannot panic; only runs when result.len() == 1
-            Ok(result.swap_remove(0))
-        } else {
-            anyhow::bail!("Zone results is unexpectedly empty; should be 1 result");
+            Err(ureq::Error::Transport(e)) => {
+                anyhow::bail!("transport error encountered when fetching Zones from API: {}", e)
+            }
         }
     }
 
@@ -78,95 +83,110 @@ impl<'a> Client<'a> {
         dns_record: &str,
         dns_record_type: DnsRecordType,
     ) -> anyhow::Result<DnsRecord> {
-        let mut request = ureq::get(&format!(
+        let request = ureq::get(&format!(
             "https://api.cloudflare.com/client/v4/zones/{zone_identifier}/dns_records",
             zone_identifier = zone_id
-        ));
-        request
-            .query("name", dns_record)
-            .query("type", &dns_record_type.to_string())
-            .set("content-type", "application/json")
-            .set("authorization", &format!("Bearer {}", self.api_token));
-        let response = (self.get_dns_record)(request);
+        ))
+        .query("name", dns_record)
+        .query("type", &dns_record_type.to_string())
+        .set("content-type", "application/json")
+        .set("authorization", &format!("Bearer {}", self.api_token));
 
-        let body: ApiResponseCollection<DnsRecord> =
-            response.into_json_deserialize().context("failed to parse DNS Records JSON response")?;
+        match (self.get_dns_record)(request) {
+            Ok(response) | Err(ureq::Error::Status(_, response)) => {
+                let body: ApiResponseCollection<DnsRecord> =
+                    response.into_json().context("failed to parse DNS Records JSON response")?;
 
-        if !body.errors().is_empty() {
-            if body.errors().len() > 1 {
-                eprintln!("Errors returned from DNS Records API:");
-                for error in body.errors() {
-                    eprintln!("- {}", error);
+                if !body.errors().is_empty() {
+                    if body.errors().len() > 1 {
+                        eprintln!("Errors returned from DNS Records API:");
+                        for error in body.errors() {
+                            eprintln!("- {}", error);
+                        }
+
+                        // cannot panic; only runs when body.errors.len() > 1
+                        anyhow::bail!(
+                            "Errors returned from DNS Records API; first one (see stderror for others): {}",
+                            body.errors()[0]
+                        );
+                    } else {
+                        // cannot panic; only runs with body.errors.len() >= 1
+                        anyhow::bail!("Error returned from DNS Records API: {}", body.errors()[0]);
+                    }
                 }
 
-                // cannot panic; only runs when body.errors.len() > 1
-                anyhow::bail!(
-                    "Errors returned from DNS Records API; first one (see stderror for others): {}",
-                    body.errors()[0]
-                );
-            } else {
-                // cannot panic; only runs with body.errors.len() >= 1
-                anyhow::bail!("Error returned from DNS Records API: {}", body.errors()[0]);
-            }
-        }
+                if let Some(mut result) = body.take_result() {
+                    if result.len() != 1 {
+                        anyhow::bail!("Unexpected number of DNS Records results; should be 1: {}", result.len());
+                    }
 
-        if let Some(mut result) = body.take_result() {
-            if result.len() != 1 {
-                anyhow::bail!("Unexpected number of DNS Records results; should be 1: {}", result.len());
+                    // cannot panic; only runs when result.len() == 1
+                    Ok(result.swap_remove(0))
+                } else {
+                    anyhow::bail!("DNS Records results is unexpectedly empty; should be 1 result");
+                }
             }
-
-            // cannot panic; only runs when result.len() == 1
-            Ok(result.swap_remove(0))
-        } else {
-            anyhow::bail!("DNS Records results is unexpectedly empty; should be 1 result");
+            Err(ureq::Error::Transport(e)) => {
+                anyhow::bail!("transport error encountered when fetching Zones from API: {}", e)
+            }
         }
     }
 
     pub fn update_dns_record(&self, zone_id: &str, dns_record_id: &str, ip: IpAddr) -> anyhow::Result<()> {
-        let mut request = ureq::patch(&format!(
-            "https://api.cloudflare.com/client/v4/zones/{zone_identifier}/dns_records/{identifier}",
-            zone_identifier = zone_id,
-            identifier = dns_record_id
-        ));
-        request.set("content-type", "application/json").set("authorization", &format!("Bearer {}", self.api_token));
-        let response = (self.patch_dns_record)(request, json!({ "content": ip }));
+        let request = ureq::request(
+            "PATCH",
+            &format!(
+                "https://api.cloudflare.com/client/v4/zones/{zone_identifier}/dns_records/{identifier}",
+                zone_identifier = zone_id,
+                identifier = dns_record_id
+            ),
+        )
+        .set("content-type", "application/json")
+        .set("authorization", &format!("Bearer {}", self.api_token));
 
-        let body: ApiResponseItem<DnsRecord> =
-            response.into_json_deserialize().context("failed to parse DNS Records update JSON response")?;
+        match (self.patch_dns_record)(request, json!({ "content": ip })) {
+            Ok(response) | Err(ureq::Error::Status(_, response)) => {
+                let body: ApiResponseItem<DnsRecord> =
+                    response.into_json().context("failed to parse DNS Records update JSON response")?;
 
-        if !body.errors().is_empty() {
-            if body.errors().len() > 1 {
-                eprintln!("Errors returned from DNS Records update API:");
-                for error in body.errors() {
-                    eprintln!("- {}", error);
+                if !body.errors().is_empty() {
+                    if body.errors().len() > 1 {
+                        eprintln!("Errors returned from DNS Records update API:");
+                        for error in body.errors() {
+                            eprintln!("- {}", error);
+                        }
+
+                        // cannot panic; only runs when body.errors.len() > 1
+                        anyhow::bail!(
+                            "Errors returned from DNS Records update API; first one (see stderror for others): {}",
+                            body.errors()[0]
+                        );
+                    } else {
+                        // cannot panic; only runs when body.errors.len() >= 1
+                        anyhow::bail!("Error returned from DNS Records update API: {}", body.errors()[0]);
+                    }
                 }
 
-                // cannot panic; only runs when body.errors.len() > 1
-                anyhow::bail!(
-                    "Errors returned from DNS Records update API; first one (see stderror for others): {}",
-                    body.errors()[0]
-                );
-            } else {
-                // cannot panic; only runs when body.errors.len() >= 1
-                anyhow::bail!("Error returned from DNS Records update API: {}", body.errors()[0]);
+                Ok(())
+            }
+            Err(ureq::Error::Transport(e)) => {
+                anyhow::bail!("transport error encountered when fetching Zones from API: {}", e)
             }
         }
-
-        Ok(())
     }
 }
 
 #[cfg(test)]
 impl Client<'_> {
-    pub fn set_get_zone(&mut self, get_zone: fn(Request) -> Response) {
+    pub fn set_get_zone(&mut self, get_zone: fn(Request) -> Result<Response, ureq::Error>) {
         self.get_zone = get_zone;
     }
 
-    pub fn set_get_dns_record(&mut self, get_dns_record: fn(Request) -> Response) {
+    pub fn set_get_dns_record(&mut self, get_dns_record: fn(Request) -> Result<Response, ureq::Error>) {
         self.get_dns_record = get_dns_record;
     }
 
-    pub fn set_patch_dns_record(&mut self, patch_dns_record: fn(Request, SerdeValue) -> Response) {
+    pub fn set_patch_dns_record(&mut self, patch_dns_record: fn(Request, SerdeValue) -> Result<Response, ureq::Error>) {
         self.patch_dns_record = patch_dns_record;
     }
 }
@@ -199,19 +219,19 @@ pub mod tests {
         DnsRecord::new(DNS_RECORD_ID, false, IpAddr::V4(Ipv4Addr::new(198, 51, 100, 4)))
     }
 
-    pub fn mock_zone(_: Request) -> Response {
+    pub fn mock_zone(_: Request) -> Result<Response, ureq::Error> {
         Response::new(200, "OK", include_str!("../../../resources/tests/cloudflare/zone.json"))
     }
 
-    pub fn mock_dns_record(_: Request) -> Response {
+    pub fn mock_dns_record(_: Request) -> Result<Response, ureq::Error> {
         Response::new(200, "OK", include_str!("../../../resources/tests/cloudflare/dns_record.json"))
     }
 
-    pub fn mock_dns_record_update(_: Request, _: SerdeValue) -> Response {
+    pub fn mock_dns_record_update(_: Request, _: SerdeValue) -> Result<Response, ureq::Error> {
         Response::new(200, "OK", include_str!("../../../resources/tests/cloudflare/dns_record_update.json"))
     }
 
-    fn mock_failure(_: Request) -> Response {
+    fn mock_failure(_: Request) -> Result<Response, ureq::Error> {
         Response::new(400, "Bad Request", include_str!("../../../resources/tests/cloudflare/failure.json"))
     }
 
