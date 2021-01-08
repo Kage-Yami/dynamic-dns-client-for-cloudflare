@@ -1,4 +1,4 @@
-use crate::api::cloudflare::api_response::ApiResponse;
+use crate::api::cloudflare::api_response::{ApiResponseCollection, ApiResponseItem};
 use crate::api::cloudflare::dns_record::DnsRecord;
 use crate::api::cloudflare::dns_record_type::DnsRecordType;
 use crate::api::cloudflare::zone::Zone;
@@ -39,7 +39,7 @@ impl<'a> Client<'a> {
             .set("authorization", &format!("Bearer {}", self.api_token));
         let response = (self.get_zone)(request);
 
-        let body: ApiResponse<Zone> =
+        let body: ApiResponseCollection<Zone> =
             response.into_json_deserialize().context("failed to parse Zones JSON response")?;
 
         if !body.errors().is_empty() {
@@ -89,7 +89,7 @@ impl<'a> Client<'a> {
             .set("authorization", &format!("Bearer {}", self.api_token));
         let response = (self.get_dns_record)(request);
 
-        let body: ApiResponse<DnsRecord> =
+        let body: ApiResponseCollection<DnsRecord> =
             response.into_json_deserialize().context("failed to parse DNS Records JSON response")?;
 
         if !body.errors().is_empty() {
@@ -131,7 +131,7 @@ impl<'a> Client<'a> {
         request.set("content-type", "application/json").set("authorization", &format!("Bearer {}", self.api_token));
         let response = (self.patch_dns_record)(request, json!({ "content": ip }));
 
-        let body: ApiResponse<DnsRecord> =
+        let body: ApiResponseItem<DnsRecord> =
             response.into_json_deserialize().context("failed to parse DNS Records update JSON response")?;
 
         if !body.errors().is_empty() {
@@ -208,7 +208,7 @@ pub mod tests {
     }
 
     pub fn mock_dns_record_update(_: Request, _: SerdeValue) -> Response {
-        Response::new(200, "OK", include_str!("../../../resources/tests/cloudflare/dns_record.json"))
+        Response::new(200, "OK", include_str!("../../../resources/tests/cloudflare/dns_record_update.json"))
     }
 
     fn mock_failure(_: Request) -> Response {
