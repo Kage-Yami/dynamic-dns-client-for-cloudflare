@@ -5,8 +5,8 @@ use ureq::{Request, Response};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 pub struct Client {
-    fetch_v4: fn(Request) -> Response,
-    fetch_v6: fn(Request) -> Response,
+    fetch_v4: fn(Request) -> Result<Response, ureq::Error>,
+    fetch_v6: fn(Request) -> Result<Response, ureq::Error>,
 }
 
 impl Client {
@@ -16,44 +16,48 @@ impl Client {
 
     // mocked
     #[cfg(not(tarpaulin_include))]
-    fn get(mut request: Request) -> Response {
+    fn get(request: Request) -> Result<Response, ureq::Error> {
         request.call()
     }
 
     pub fn v4(self) -> anyhow::Result<Ipv4Addr> {
-        let response = (self.fetch_v4)(ureq::get("https://api.ipify.org/"));
+        match (self.fetch_v4)(ureq::get("https://api.ipify.org/")) {
+            Ok(response) => {
+                let body = response.into_string().context("failed to parse IPv4 response")?;
+                let ip = body.trim();
 
-        if response.status() != 200 {
-            anyhow::bail!("failed to fetch IPv4 from API - {} {}", response.status(), response.status_text());
+                Ipv4Addr::from_str(ip).context("failed to parse IPv4 address")
+            }
+            Err(ureq::Error::Status(code, _)) => anyhow::bail!("failed to fetch IPv4 from API: {}", code),
+            Err(ureq::Error::Transport(e)) => {
+                anyhow::bail!("transport error encountered when fetching IPv4 from API: {}", e)
+            }
         }
-
-        let body = response.into_string().context("failed to parse IPv4 response")?;
-        let ip = body.trim();
-
-        Ipv4Addr::from_str(ip).context("failed to parse IPv4 address")
     }
 
     pub fn v6(self) -> anyhow::Result<Ipv6Addr> {
-        let response = (self.fetch_v6)(ureq::get("https://api6.ipify.org/"));
+        match (self.fetch_v6)(ureq::get("https://api6.ipify.org/")) {
+            Ok(response) => {
+                let body = response.into_string().context("failed to parse IPv6 response")?;
+                let ip = body.trim();
 
-        if response.status() != 200 {
-            anyhow::bail!("failed to fetch IPv6 from API - {} {}", response.status(), response.status_text());
+                Ipv6Addr::from_str(ip).context("failed to parse IPv6 address")
+            }
+            Err(ureq::Error::Status(code, _)) => anyhow::bail!("failed to fetch IPv6 from API: {}", code),
+            Err(ureq::Error::Transport(e)) => {
+                anyhow::bail!("transport error encountered when fetching IPv6 from API: {}", e)
+            }
         }
-
-        let body = response.into_string().context("failed to parse IPv6 response")?;
-        let ip = body.trim();
-
-        Ipv6Addr::from_str(ip).context("failed to parse IPv6 address")
     }
 }
 
 #[cfg(test)]
 impl Client {
-    pub fn set_fetch_v4(&mut self, fetch: fn(Request) -> Response) {
+    pub fn set_fetch_v4(&mut self, fetch: fn(Request) -> Result<Response, ureq::Error>) {
         self.fetch_v4 = fetch;
     }
 
-    pub fn set_fetch_v6(&mut self, fetch: fn(Request) -> Response) {
+    pub fn set_fetch_v6(&mut self, fetch: fn(Request) -> Result<Response, ureq::Error>) {
         self.fetch_v6 = fetch;
     }
 }
@@ -65,11 +69,11 @@ pub mod tests {
     use std::net::{Ipv4Addr, Ipv6Addr};
     use ureq::{Request, Response};
 
-    pub fn mock_v4(_: Request) -> Response {
+    pub fn mock_v4(_: Request) -> Result<Response, ureq::Error> {
         Response::new(200, "OK", "127.0.0.1")
     }
 
-    pub fn mock_v6(_: Request) -> Response {
+    pub fn mock_v6(_: Request) -> Result<Response, ureq::Error> {
         Response::new(200, "OK", "::1")
     }
 
