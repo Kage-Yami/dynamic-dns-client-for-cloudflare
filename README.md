@@ -8,6 +8,7 @@
   - [Recurring](#recurring)
     - [Windows](#windows)
     - [Linux - `systemd`](#linux---systemd)
+  - [Full help extract](#full-help-extract)
 - [Attributions](#attributions)
 
 ## Overview
@@ -126,6 +127,23 @@ Save the above to `~/.config/systemd/user/ddns-for-cloudflare.timer`, and then r
 ```sh
 systemctl --user daemon-reload
 systemctl --user enable --now ddns-for-cloudflare.timer
+```
+
+### Full help extract
+
+```
+Usage: ddns-for-cloudflare.exe -z <zone> -d <domain> -a <api-token> [-4] [-6]
+
+A CLI utility to update the A and AAAA DNS records of a domain managed by Cloudflare, from the executing system's current public IP address (written in Rust).
+
+Options:
+  -z, --zone        the name of the DNS zone the domain to update is in
+  -d, --domain      the name of the domain to update
+  -a, --api-token   the API key with permissions to query and update the DNS
+                    record
+  -4, --only-v4     only update the A record (IPv4)
+  -6, --only-v6     only update the AAAA record (IPv6)
+  --help            display usage information
 ```
 
 ## Attributions
