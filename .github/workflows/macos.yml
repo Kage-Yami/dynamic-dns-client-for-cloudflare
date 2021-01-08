@@ -1,0 +1,20 @@
+on:
+  - push
+
+jobs:
+  aarch64:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          target: aarch64-apple-darwin
+      - run: cargo build --release --target aarch64-apple-darwin
+  x86_64:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          target: x86_64-apple-darwin
+      - run: cargo build --release --target x86_64-apple-darwin
