@@ -77,12 +77,12 @@ package:
 linux-aarch64:
   <<: *build
   script:
-    - cargo build --target aarch64-unknown-linux-musl
+    - cargo build --release --target aarch64-unknown-linux-musl
 
 linux-x86_64:
   <<: *build
   script:
-    - cargo build --target x86_64-unknown-linux-musl
+    - cargo build --release --target x86_64-unknown-linux-musl
 
 ##################################################### PUBLISH JOBS #####################################################
 ## These don't run for untagged pipelines (as there's no point; no additional testing is done).
