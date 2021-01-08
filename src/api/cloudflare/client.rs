@@ -79,7 +79,7 @@ impl<'a> Client<'a> {
         dns_record_type: DnsRecordType,
     ) -> anyhow::Result<DnsRecord> {
         let mut request = ureq::get(&format!(
-            "https://api.cloudflare.com/client/v4/zones/{zone_identifier}/dns/records",
+            "https://api.cloudflare.com/client/v4/zones/{zone_identifier}/dns_records",
             zone_identifier = zone_id
         ));
         request
@@ -124,7 +124,7 @@ impl<'a> Client<'a> {
 
     pub fn update_dns_record(&self, zone_id: &str, dns_record_id: &str, ip: IpAddr) -> anyhow::Result<()> {
         let mut request = ureq::patch(&format!(
-            "https://api.cloudflare.com/client/v4/zones/{zone_identifier}/dns/records/{identifier}",
+            "https://api.cloudflare.com/client/v4/zones/{zone_identifier}/dns_records/{identifier}",
             zone_identifier = zone_id,
             identifier = dns_record_id
         ));
