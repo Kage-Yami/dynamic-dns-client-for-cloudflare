@@ -25,10 +25,6 @@ pub struct ApiResponseItem<T: ApiResult> {
 }
 
 impl<T: ApiResult> ApiResponseItem<T> {
-    pub fn take_result(self) -> Option<T> {
-        self.result
-    }
-
     pub fn errors(&self) -> &Vec<ApiError> {
         &self.errors
     }

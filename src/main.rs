@@ -1,6 +1,9 @@
 // Enable all clippy lints and enforce, and opt out of individual lints
 #![cfg_attr(feature = "cargo-clippy", warn(clippy::cargo, clippy::pedantic, clippy::nursery))]
-#![cfg_attr(feature = "cargo-clippy", allow(clippy::default_trait_access, clippy::must_use_candidate))]
+#![cfg_attr(
+    feature = "cargo-clippy",
+    allow(clippy::default_trait_access, clippy::module_name_repetitions, clippy::must_use_candidate)
+)]
 //
 // Force certain lints to be errors
 #![deny(unused_must_use)]
