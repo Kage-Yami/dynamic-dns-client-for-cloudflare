@@ -21,27 +21,27 @@ impl Client {
     }
 
     pub fn v4(self) -> anyhow::Result<Ipv4Addr> {
-        let response = (self.fetch_v4)(ureq::get("https://ip4only.me/api/"));
+        let response = (self.fetch_v4)(ureq::get("https://api.ipify.org/"));
 
         if response.status() != 200 {
             anyhow::bail!("failed to fetch IPv4 from API - {} {}", response.status(), response.status_text());
         }
 
         let body = response.into_string().context("failed to parse IPv4 response")?;
-        let ip = body.split(',').nth(1).context("failed to read IPv4 from body")?;
+        let ip = body.trim();
 
         Ipv4Addr::from_str(ip).context("failed to parse IPv4 address")
     }
 
     pub fn v6(self) -> anyhow::Result<Ipv6Addr> {
-        let response = (self.fetch_v6)(ureq::get("https://ip6only.me/api/"));
+        let response = (self.fetch_v6)(ureq::get("https://api6.ipify.org/"));
 
         if response.status() != 200 {
             anyhow::bail!("failed to fetch IPv6 from API - {} {}", response.status(), response.status_text());
         }
 
         let body = response.into_string().context("failed to parse IPv6 response")?;
-        let ip = body.split(',').nth(1).context("failed to read IPv6 from body")?;
+        let ip = body.trim();
 
         Ipv6Addr::from_str(ip).context("failed to parse IPv6 address")
     }
@@ -66,11 +66,11 @@ pub mod tests {
     use ureq::{Request, Response};
 
     pub fn mock_v4(_: Request) -> Response {
-        Response::new(200, "OK", include_str!("../../resources/tests/ip/v4.csv"))
+        Response::new(200, "OK", "127.0.0.1")
     }
 
     pub fn mock_v6(_: Request) -> Response {
-        Response::new(200, "OK", include_str!("../../resources/tests/ip/v6.csv"))
+        Response::new(200, "OK", "::1")
     }
 
     #[test]
