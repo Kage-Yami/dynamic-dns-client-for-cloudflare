@@ -10,7 +10,7 @@
 ### 1.0.0 - _unreleased_
 
 - Initial "stable" release:
-  - Builds available for Windows (x86_64), Linux (aarch64, x86_64), and macOS (aarch64, x86_64)
+  - Builds available for Windows (x86_64, i686), Linux (aarch64, x86_64, i686, armv7hf, armhf), and macOS (x86_64)
   - Published to [crates.io](https://crates.io/crates/dynamic-dns-client-for-cloudflare)
 
 ## Pre-release versions

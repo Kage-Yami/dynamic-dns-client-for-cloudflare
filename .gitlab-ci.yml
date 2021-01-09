@@ -74,15 +74,7 @@ package:
 ## These run for all pipelines (as they're relevant to both untagged and tagged runs).
 ########################################################################################################################
 
-linux-x86_64:
-  <<: *build
-  script:
-    - cargo build --release --target x86_64-unknown-linux-musl
 
-linux-i686:
-  <<: *build
-  script:
-    - cargo build --release --target i686-unknown-linux-musl
 
 ##################################################### PUBLISH JOBS #####################################################
 ## These don't run for untagged pipelines (as there's no point; no additional testing is done).

@@ -35,7 +35,7 @@ This project follows [Semantic Versioning principals](https://semver.org/) start
 
 This repository is located on [GitLab.com](https://gitlab.com/Kage-Yami/dynamic-dns-client-for-cloudflare).
 
-There is a [mirror on GitHub](https://github.com/Kage-Yami/dynamic-dns-client-for-cloudflare), but this is not used for development; it is only used for building and testing Windows and macOS packages utilising GitHub Actions. Any issues should be opened on the original GitLab repository.
+There is a [mirror on GitHub](https://github.com/Kage-Yami/dynamic-dns-client-for-cloudflare), but this is not used for development; it is only used for building the tool for each platform. Any issues should be opened on the original GitLab repository.
 
 ## Usage
 
