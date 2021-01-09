@@ -19,6 +19,34 @@ jobs:
           command: build
           args: --release --target aarch64-unknown-linux-musl
 
+  linux-armv7hf:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: armv7-unknown-linux-musleabihf
+      - uses: actions-rs/cargo@v1
+        with:
+          use-cross: true
+          command: build
+          args: --release --target armv7-unknown-linux-musleabihf
+
+  linux-armhf:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: arm-unknown-linux-musleabihf
+      - uses: actions-rs/cargo@v1
+        with:
+          use-cross: true
+          command: build
+          args: --release --target arm-unknown-linux-musleabihf
+
 #################################################### WINDOWS BUILDS ####################################################
 
   windows-x86_64:
