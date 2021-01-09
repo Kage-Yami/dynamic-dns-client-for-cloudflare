@@ -83,7 +83,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: linux-armv7hf
-          path: target/armv7hf-unknown-linux-musl/release/ddns-for-cloudflare
+          path: target/armv7-unknown-linux-musleabihf/release/ddns-for-cloudflare
 
   linux-armhf:
     runs-on: ubuntu-latest
@@ -103,7 +103,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: linux-armhf
-          path: target/x86_64-unknown-linux-musl/release/ddns-for-cloudflare
+          path: target/arm-unknown-linux-musleabihf/release/ddns-for-cloudflare
 
   #################################################### WINDOWS BUILDS ####################################################
 
