@@ -31,6 +31,16 @@ jobs:
           target: x86_64-pc-windows-msvc
       - run: cargo build --release --target x86_64-pc-windows-msvc
 
+  windows-i686:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: i686-pc-windows-msvc
+      - run: cargo build --release --target i686-pc-windows-msvc
+
 ##################################################### MACOS BUILDS #####################################################
 
   macos-x86_64:
@@ -42,6 +52,16 @@ jobs:
           toolchain: stable
           target: x86_64-apple-darwin
       - run: cargo build --release --target x86_64-apple-darwin
+
+  macos-i686:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: i686-apple-darwin
+      - run: cargo build --release --target i686-apple-darwin
 
   macos-aarch64:
     runs-on: macos-11.0
