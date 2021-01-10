@@ -58,8 +58,8 @@ echo "... artifact information retrieved!"
 links=$(echo "$artifacts" | jq '[ .artifacts[] | { name: .name, url: .archive_download_url } ]')
 
 for i in 0 1 2 3 4 5 6 7; do
-  name=$(echo "$links" | jq ".[$i].name")
-  link=$(echo "$links" | jq ".[$i].url")
+  name=$(echo "$links" | jq --raw-output ".[$i].name")
+  link=$(echo "$links" | jq --raw-output ".[$i].url")
 
   echo "Downloading artifact $((i + 1)): $name..."
 
