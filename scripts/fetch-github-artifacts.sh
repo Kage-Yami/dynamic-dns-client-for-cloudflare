@@ -13,14 +13,14 @@ workflow_id="null"
 while [ $attempt -lt 3 ] && [ $workflow_id = "null" ]; do
   attempt=$((attempt + 1))
 
-  echo "Retrieving workflow runs for commit '$CI_COMMIT_SHA' on ref '$CI_COMMIT_REF' from GitHub Actions (attempt $attempt of 3)..."
+  echo "Retrieving workflow runs for commit '$CI_COMMIT_SHA' on ref '$CI_COMMIT_REF_SLUG' from GitHub Actions (attempt $attempt of 3)..."
 
   if [ "$CI_COMMIT_TAG" ]; then
     workflow_runs=$(curl --user "Kage-Yami:$GITHUB_API_TOKEN" \
       "https://api.github.com/repos/Kage-Yami/dynamic-dns-client-for-cloudflare/actions/runs?branch=$CI_COMMIT_TAG&event=push")
   else
     workflow_runs=$(curl --user "Kage-Yami:$GITHUB_API_TOKEN" \
-      "https://api.github.com/repos/Kage-Yami/dynamic-dns-client-for-cloudflare/actions/runs?branch=$CI_COMMIT_REF&event=push")
+      "https://api.github.com/repos/Kage-Yami/dynamic-dns-client-for-cloudflare/actions/runs?branch=$CI_COMMIT_REF_SLUG&event=push")
   fi
 
   echo "... workflow runs retrieved!"
