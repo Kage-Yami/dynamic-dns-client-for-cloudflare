@@ -13,14 +13,14 @@ workflow_id="null"
 while [ $attempt -lt 3 ] && [ $workflow_id = "null" ]; do
   attempt=$((attempt + 1))
 
-  echo "Retrieving workflow runs for commit '$CI_COMMIT_SHA' on ref '$CI_COMMIT_REF' from GitHub Actions (attempt $attempt of 3)..."
+  echo "Retrieving workflow runs for commit '$CI_COMMIT_SHA' on ref '$CI_COMMIT_REF_SLUG' from GitHub Actions (attempt $attempt of 3)..."
 
   if [ "$CI_COMMIT_TAG" ]; then
     workflow_runs=$(curl --user "Kage-Yami:$GITHUB_API_TOKEN" \
       "https://api.github.com/repos/Kage-Yami/dynamic-dns-client-for-cloudflare/actions/runs?branch=$CI_COMMIT_TAG&event=push")
   else
     workflow_runs=$(curl --user "Kage-Yami:$GITHUB_API_TOKEN" \
-      "https://api.github.com/repos/Kage-Yami/dynamic-dns-client-for-cloudflare/actions/runs?branch=$CI_COMMIT_REF&event=push")
+      "https://api.github.com/repos/Kage-Yami/dynamic-dns-client-for-cloudflare/actions/runs?branch=$CI_COMMIT_REF_SLUG&event=push")
   fi
 
   echo "... workflow runs retrieved!"
@@ -58,8 +58,8 @@ echo "... artifact information retrieved!"
 links=$(echo "$artifacts" | jq '[ .artifacts[] | { name: .name, url: .archive_download_url } ]')
 
 for i in 0 1 2 3 4 5 6 7; do
-  name=$(echo "$links" | jq ".[$i].name")
-  link=$(echo "$links" | jq ".[$i].url")
+  name=$(echo "$links" | jq --raw-output ".[$i].name")
+  link=$(echo "$links" | jq --raw-output ".[$i].url")
 
   echo "Downloading artifact $((i + 1)): $name..."
 
@@ -69,7 +69,13 @@ for i in 0 1 2 3 4 5 6 7; do
 
   echo "... download complete! Uploading artifact..."
 
-  curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file "$name"/* \
+  file="$name/ddns-for-cloudflare"
+
+  if [ "$name" = "windows-x86_64" ] || [ "$name" = "windows-i686" ]; then
+    file="$file.exe"
+  fi
+
+  curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file "$file" \
     "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/$name/$CI_COMMIT_TAG/"
 
   echo "... upload complete!"

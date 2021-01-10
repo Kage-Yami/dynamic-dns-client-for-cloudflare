@@ -3,7 +3,8 @@
 - [1.x.x](#1xx)
   - [1.0.0 - _unreleased_](#100---unreleased)
 - [Pre-release versions](#pre-release-versions)
-  - [0.1.4 - 10-Jan-2020](#014---10-jan-2020)
+  - [0.1.5 - 10-Jan-2021](#015---10-jan-2021)
+  - [0.1.4 - 10-Jan-2021](#014---10-jan-2021)
   - [0.1.3 - 10-Jan-2021](#013---10-jan-2021)
   - [0.1.2 - 10-Jan-2021](#012---10-jan-2021)
   - [0.1.1 - 10-Jan-2021](#011---10-jan-2021)
@@ -19,7 +20,16 @@
 
 ## Pre-release versions
 
-### 0.1.4 - 10-Jan-2020
+### 0.1.5 - 10-Jan-2021
+
+- Artifact script fixes:
+  - Input filename for `curl`
+  - Raw output for `jq` strings
+  - Correct `$CI_COMMIT_REF` → `$CI_COMMIT_REF_SLUG`
+
+### 0.1.4 - 10-Jan-2021
+
+_Note: this release has not been published to crates.io, nor had packages released_
 
 - Fix artifact script to filter to the tag's ref if on a tagged pipeline
 
