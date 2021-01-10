@@ -69,7 +69,13 @@ for i in 0 1 2 3 4 5 6 7; do
 
   echo "... download complete! Uploading artifact..."
 
-  curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file "$name"/* \
+  file="$name/ddns-for-cloudflare"
+
+  if [ "$name" = "windows-x86_64" ] || [ "$name" = "windows-i686" ]; then
+    file="$file.exe"
+  fi
+
+  curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file "$file" \
     "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/$name/$CI_COMMIT_TAG/"
 
   echo "... upload complete!"
