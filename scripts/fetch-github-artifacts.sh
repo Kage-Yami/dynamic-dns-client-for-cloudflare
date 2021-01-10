@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/bin/sh
 
 ## EXIT CODES:
 ##  - 1: GitHub Actions did not (successfully) complete
