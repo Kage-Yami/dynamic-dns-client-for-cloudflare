@@ -19,7 +19,7 @@ jobs:
           command: build
           args: --release --target x86_64-unknown-linux-musl
       - name: Upload artifacts
-#        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/')
         uses: actions/upload-artifact@v2
         with:
           name: linux-x86_64
@@ -39,7 +39,7 @@ jobs:
           command: build
           args: --release --target i686-unknown-linux-musl
       - name: Upload artifacts
-#        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/')
         uses: actions/upload-artifact@v2
         with:
           name: linux-i686
@@ -59,7 +59,7 @@ jobs:
           command: build
           args: --release --target aarch64-unknown-linux-musl
       - name: Upload artifacts
-#        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/')
         uses: actions/upload-artifact@v2
         with:
           name: linux-aarch64
@@ -79,7 +79,7 @@ jobs:
           command: build
           args: --release --target armv7-unknown-linux-musleabihf
       - name: Upload artifacts
-#        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/')
         uses: actions/upload-artifact@v2
         with:
           name: linux-armv7hf
@@ -99,7 +99,7 @@ jobs:
           command: build
           args: --release --target arm-unknown-linux-musleabihf
       - name: Upload artifacts
-#        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/')
         uses: actions/upload-artifact@v2
         with:
           name: linux-armhf
@@ -117,7 +117,7 @@ jobs:
           target: x86_64-pc-windows-msvc
       - run: cargo build --release --target x86_64-pc-windows-msvc
       - name: Upload artifacts
-#        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/')
         uses: actions/upload-artifact@v2
         with:
           name: windows-x86_64
@@ -133,7 +133,7 @@ jobs:
           target: i686-pc-windows-msvc
       - run: cargo build --release --target i686-pc-windows-msvc
       - name: Upload artifacts
-#        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/')
         uses: actions/upload-artifact@v2
         with:
           name: windows-i686
@@ -151,7 +151,7 @@ jobs:
           target: x86_64-apple-darwin
       - run: cargo build --release --target x86_64-apple-darwin
       - name: Upload artifacts
-#        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/')
         uses: actions/upload-artifact@v2
         with:
           name: macos-x86_64
