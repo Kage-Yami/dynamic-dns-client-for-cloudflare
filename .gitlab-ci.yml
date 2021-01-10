@@ -83,6 +83,7 @@ builds:
   <<: *build
   image: alpine:3.12.3
   script:
+    - chmod u+x ./scripts/fetch-github-artifacts.sh
     - ./scripts/fetch-github-artifacts.sh
 
 ##################################################### PUBLISH JOBS #####################################################
