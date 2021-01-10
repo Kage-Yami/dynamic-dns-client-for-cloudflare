@@ -3,7 +3,8 @@
 - [1.x.x](#1xx)
   - [1.0.0 - _unreleased_](#100---unreleased)
 - [Pre-release versions](#pre-release-versions)
-  - [0.1.0 - _unreleased_](#010---unreleased)
+  - [0.1.1 - 10-Jan-2021](#011---10-jan-2021)
+  - [0.1.0 - 10-Jan-2021](#010---10-jan-2021)
 
 ## 1.x.x
 
@@ -15,8 +16,13 @@
 
 ## Pre-release versions
 
-### 0.1.0 - _unreleased_
+### 0.1.1 - 10-Jan-2021
 
-_Note: this release has not been published to crates.io_
+- Fix number of artifacts downloaded from GitHub Actions
+- Enable publication to crates.io
+
+### 0.1.0 - 10-Jan-2021
+
+_Note: this release has not been published to crates.io, nor had packages released_
 
 - Initial pre-release version
