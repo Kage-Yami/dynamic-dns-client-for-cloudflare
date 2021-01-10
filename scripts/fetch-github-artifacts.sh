@@ -16,9 +16,9 @@ while [ $retries -lt 3 ] && [ $workflow_id = "null" ]; do
   workflow_runs=$(curl --user "Kage-Yami:$GITHUB_API_TOKEN" \
     "https://api.github.com/repos/Kage-Yami/dynamic-dns-client-for-cloudflare/actions/runs?branch=develop&event=push")
 
-  workflow_id=$(echo "$workflow_runs" | jq ".workflow_runs[] | \
-    select(.head_sha == \"$CI_COMMIT_SHA\" and .status == \"completed\" and .conclusion == \"success\") \
-    [id] | sort | reverse | .[0]")
+  workflow_id=$(echo "$workflow_runs" | jq "[ .workflow_runs[] | \
+    select(.head_sha == \"$CI_COMMIT_SHA\" and .status == \"completed\" and .conclusion == \"success\") | \
+    .id ] | sort | reverse | .[0]")
 
   # GitHub Actions might not have finished, so wait a bit before trying again
   sleep 4m
