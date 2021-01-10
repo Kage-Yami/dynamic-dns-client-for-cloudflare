@@ -8,7 +8,7 @@
 // Force certain lints to be errors
 #![deny(unused_must_use)]
 //
-#![doc(html_root_url = "https://docs.rs/dynamic-dns-client-for-cloudflare/0.1.3")]
+#![doc(html_root_url = "https://docs.rs/dynamic-dns-client-for-cloudflare/0.1.4")]
 
 //! # Dynamic DNS Client for Cloudflare® <!-- omit in toc -->
 //!
