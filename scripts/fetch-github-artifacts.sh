@@ -65,7 +65,7 @@ for i in 0 1 2 3 4 5 6 7; do
 
   mkdir "$name"
   curl --user "Kage-Yami:$GITHUB_API_TOKEN" "$link" --output "$name.zip"
-  tar xvf "$name.zip" -C "$name/"
+  tar xzvf "$name.zip" -C "$name/"
 
   echo "... download complete! Uploading artifact..."
 

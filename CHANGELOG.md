@@ -3,6 +3,7 @@
 - [1.x.x](#1xx)
   - [1.0.0 - _unreleased_](#100---unreleased)
 - [Pre-release versions](#pre-release-versions)
+  - [0.1.6 - 10-Jan-2021](#016---10-jan-2021)
   - [0.1.5 - 10-Jan-2021](#015---10-jan-2021)
   - [0.1.4 - 10-Jan-2021](#014---10-jan-2021)
   - [0.1.3 - 10-Jan-2021](#013---10-jan-2021)
@@ -20,7 +21,13 @@
 
 ## Pre-release versions
 
+### 0.1.6 - 10-Jan-2021
+
+- Fix `tar` to extract using `gzip`
+
 ### 0.1.5 - 10-Jan-2021
+
+_Note: this release has not been published to crates.io, nor had packages released_
 
 - Artifact script fixes:
   - Input filename for `curl`
