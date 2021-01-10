@@ -36,7 +36,7 @@ if [ "$workflow_id" = "null" ]; then
   exit 1
 fi
 
-if [ "$CI_COMMIT_TAG" ]; then
+if [ -z "$CI_COMMIT_TAG" ]; then
   echo "Completed and successful workflow runs found; not on a tagged pipeline, so exiting with success."
   exit 0
 fi
