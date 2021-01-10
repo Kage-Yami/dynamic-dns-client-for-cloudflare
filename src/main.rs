@@ -20,6 +20,7 @@
 //!   - [Recurring](#recurring)
 //!     - [Windows](#windows)
 //!     - [Linux - `systemd`](#linux---systemd)
+//!   - [Full help extract](#full-help-extract)
 //! - [Attributions](#attributions)
 //!
 //! ## Overview
@@ -27,6 +28,8 @@
 //! **_This tool has been developed by an unaffiliated third-party, and is not endorsed or supported by Cloudflare._**
 //!
 //! A CLI utility to update the A and AAAA DNS records of a domain managed by Cloudflare, from the executing system's current public IP address (written in Rust).
+//!
+//! Please note that only the `windows-x86_64` build gets realistically tested; the tool is built for other platforms "because it can be". Feel free to open issues about them so they're logged, but don't expect much to come out of it.
 //!
 //! [![Crates.io version](https://img.shields.io/crates/v/dynamic-dns-client-for-cloudflare?style=for-the-badge)](https://docs.rs/dynamic-dns-client-for-cloudflare/latest/dynamic-dns-client-for-cloudflare/)
 //! [![Crates.io downloads](https://img.shields.io/crates/d/dynamic-dns-client-for-cloudflare?style=for-the-badge)](https://crates.io/crates/dynamic-dns-client-for-cloudflare)
@@ -43,6 +46,8 @@
 //! ### Repository information
 //!
 //! This repository is located on [GitLab.com](https://gitlab.com/Kage-Yami/dynamic-dns-client-for-cloudflare).
+//!
+//! There is a [mirror on GitHub](https://github.com/Kage-Yami/dynamic-dns-client-for-cloudflare), but this is not used for development; it is only used for building the tool for each platform. Any issues should be opened on the original GitLab repository.
 //!
 //! ## Usage
 //!
@@ -136,6 +141,23 @@
 //! ```sh
 //! systemctl --user daemon-reload
 //! systemctl --user enable --now ddns-for-cloudflare.timer
+//! ```
+//!
+//! ### Full help extract
+//!
+//! ```
+//! Usage: ddns-for-cloudflare.exe -z <zone> -d <domain> -a <api-token> [-4] [-6]
+//!
+//! A CLI utility to update the A and AAAA DNS records of a domain managed by Cloudflare, from the executing system's current public IP address (written in Rust).
+//!
+//! Options:
+//!   -z, --zone        the name of the DNS zone the domain to update is in
+//!   -d, --domain      the name of the domain to update
+//!   -a, --api-token   the API key with permissions to query and update the DNS
+//!                     record
+//!   -4, --only-v4     only update the A record (IPv4)
+//!   -6, --only-v6     only update the AAAA record (IPv6)
+//!   --help            display usage information
 //! ```
 //!
 //! ## Attributions
