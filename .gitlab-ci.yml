@@ -81,7 +81,7 @@ package:
 # Runs after `check::version` (below) in tagged pipelines
 builds:
   <<: *build
-  image: alpine:3.12.3
+  image: alpine:3.13.0
   script:
     - chmod u+x ./scripts/fetch-github-artifacts.sh
     - ./scripts/fetch-github-artifacts.sh
