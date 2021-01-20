@@ -19,8 +19,9 @@ A CLI utility to update the A and AAAA DNS records of a domain managed by Cloudf
 
 Please note that dog-fooding no longer occurs for this utility, so support and maintenance may be spotty.
 
-[![Crates.io version](https://img.shields.io/crates/v/dynamic-dns-client-for-cloudflare?style=for-the-badge)](https://docs.rs/dynamic-dns-client-for-cloudflare/latest/dynamic-dns-client-for-cloudflare/)
-[![Crates.io downloads](https://img.shields.io/crates/d/dynamic-dns-client-for-cloudflare?style=for-the-badge)](https://crates.io/crates/dynamic-dns-client-for-cloudflare)
+[![docs.io documentation](https://img.shields.io/badge/docs.io-Documentation-orange?style=for-the-badge)](https://docs.rs/dynamic-dns-client-for-cloudflare/latest/dynamic-dns-client-for-cloudflare/)
+[![crates.io version](https://img.shields.io/crates/v/dynamic-dns-client-for-cloudflare?style=for-the-badge)](https://docs.rs/dynamic-dns-client-for-cloudflare/latest/dynamic-dns-client-for-cloudflare/)
+[![crates.io downloads](https://img.shields.io/crates/d/dynamic-dns-client-for-cloudflare?style=for-the-badge)](https://crates.io/crates/dynamic-dns-client-for-cloudflare)
 [![Gitlab pipeline status](https://img.shields.io/gitlab/pipeline/Kage-Yami/dynamic-dns-client-for-cloudflare/main?style=for-the-badge)](https://gitlab.com/Kage-Yami/dynamic-dns-client-for-cloudflare/pipelines/main/latest)
 [![Gitlab code coverage](https://img.shields.io/gitlab/coverage/Kage-Yami/dynamic-dns-client-for-cloudflare/main?style=for-the-badge)](https://gitlab.com/Kage-Yami/dynamic-dns-client-for-cloudflare)
 [![Lines of code](https://img.shields.io/tokei/lines/gitlab/Kage-Yami/dynamic-dns-client-for-cloudflare?style=for-the-badge)](https://gitlab.com/Kage-Yami/dynamic-dns-client-for-cloudflare)
