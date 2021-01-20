@@ -63,6 +63,7 @@ for i in 0 1 2 3 4 5 6 7; do
   link=$(echo "$links" | jq --raw-output ".[$i].url")
 
   echo "Downloading artifact $((i + 1)): $name..."
+  echo "Link: $link"
 
   mkdir "$name"
   curl --user "Kage-Yami:$GITHUB_API_TOKEN" "$link" --output "$name.zip"
