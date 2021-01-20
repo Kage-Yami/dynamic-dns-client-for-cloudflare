@@ -1,7 +1,7 @@
 [package]
 name = "dynamic-dns-client-for-cloudflare"
 description = "A CLI utility to update the A and AAAA DNS records of a domain managed by Cloudflare, from the executing system's current public IP address"
-version = "0.1.7"
+version = "0.1.8"
 authors = ["Joel Smith <j.d.smith@outlook.com.au>"]
 edition = "2018"
 license = "MIT"
