@@ -5,7 +5,8 @@
 
 apk add \
   curl \
-  jq
+  jq \
+  unzip
 
 attempt=0
 workflow_id="null"
@@ -65,7 +66,7 @@ for i in 0 1 2 3 4 5 6 7; do
 
   mkdir "$name"
   curl --user "Kage-Yami:$GITHUB_API_TOKEN" "$link" --output "$name.zip"
-  tar xzvf "$name.zip" -C "$name/"
+  unzip "$name.zip" -d "$name/"
 
   echo "... download complete! Uploading artifact..."
 
