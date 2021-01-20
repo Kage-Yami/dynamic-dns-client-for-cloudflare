@@ -1,7 +1,7 @@
 # Changelog <!-- omit in toc -->
 
 - [1.x.x](#1xx)
-  - [1.0.0 - _unreleased_](#100---unreleased)
+  - [1.0.0 - 20-Jan-2021](#100---20-jan-2021)
 - [Pre-release versions](#pre-release-versions)
   - [0.1.8 - 20-Jan-2021](#018---20-jan-2021)
   - [0.1.7 - 20-Jan-2021](#017---20-jan-2021)
@@ -15,7 +15,7 @@
 
 ## 1.x.x
 
-### 1.0.0 - _unreleased_
+### 1.0.0 - 20-Jan-2021
 
 - Initial "stable" release; builds available for:
   - Windows (x86_64, i686)
