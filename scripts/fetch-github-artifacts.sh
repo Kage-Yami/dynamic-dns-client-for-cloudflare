@@ -66,7 +66,8 @@ for i in 0 1 2 3 4 5 6 7; do
   echo "Link: $link"
 
   mkdir "$name"
-  curl --user "Kage-Yami:$GITHUB_API_TOKEN" "$link" --output "$name.zip"
+  curl --header "accept: application/vnd.github.v3+json" \
+    --user "Kage-Yami:$GITHUB_API_TOKEN" "$link" --output "$name.zip"
   unzip "$name.zip" -d "$name/"
 
   echo "... download complete! Uploading artifact..."
