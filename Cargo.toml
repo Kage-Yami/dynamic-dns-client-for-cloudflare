@@ -12,6 +12,9 @@ categories = ["command-line-utilities"]
 
 include = ["resources/*", "src/*", "tests/*", "Cargo.toml", "CHANGELOG.md", "LICENSE", "README.md"]
 
+# Not publishing to crates.io as the utility has no purpose in a Rust ecosystem
+publish = false
+
 [[bin]]
 name = "ddns-for-cloudflare"
 path = "src/main.rs"
