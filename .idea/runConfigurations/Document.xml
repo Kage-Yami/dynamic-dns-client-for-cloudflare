@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Document" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
-    <option name="command" value="doc --no-deps" />
+    <option name="command" value="doc" />
     <option name="workingDirectory" value="file://$PROJECT_DIR$" />
     <option name="channel" value="DEFAULT" />
     <option name="allFeatures" value="false" />
