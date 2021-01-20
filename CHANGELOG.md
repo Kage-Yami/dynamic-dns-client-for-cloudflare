@@ -3,6 +3,7 @@
 - [1.x.x](#1xx)
   - [1.0.0 - _unreleased_](#100---unreleased)
 - [Pre-release versions](#pre-release-versions)
+  - [0.1.8 - 20-Jan-2021](#018---20-jan-2021)
   - [0.1.7 - 20-Jan-2021](#017---20-jan-2021)
   - [0.1.6 - 10-Jan-2021](#016---10-jan-2021)
   - [0.1.5 - 10-Jan-2021](#015---10-jan-2021)
@@ -23,7 +24,13 @@
 
 ## Pre-release versions
 
+### 0.1.8 - 20-Jan-2021
+
+- Make `curl` follow `location` header for artifact download
+
 ### 0.1.7 - 20-Jan-2021
+
+_Note: this release has not had packaged released_
 
 - Replace `tar` with `unzip`
 - Update dependencies
