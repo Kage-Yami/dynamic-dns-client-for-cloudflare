@@ -69,11 +69,6 @@ format:
   script:
     - cargo fmt -- --check
 
-package:
-  <<: *test
-  script:
-    - cargo package
-
 ###################################################### BUILD JOBS ######################################################
 ## These run for all pipelines (as they're relevant to both untagged and tagged runs).
 ########################################################################################################################
@@ -81,7 +76,7 @@ package:
 # Runs after `check::version` (below) in tagged pipelines
 builds:
   <<: *build
-  image: alpine:3.12.3
+  image: alpine:3.13.0
   script:
     - chmod u+x ./scripts/fetch-github-artifacts.sh
     - ./scripts/fetch-github-artifacts.sh
@@ -93,15 +88,8 @@ builds:
 version:
   <<: *check
   script:
-    - cargo test --test version html_root_url -- --exact
     - version=$(grep -Eo '^version = "[^"]*"$' Cargo.toml  | sed -E 's|.+ = "([^"]+)"$|\1|')
     - test $version = $CI_COMMIT_TAG
-
-publish:
-  <<: *publish
-  script:
-    - cargo login $CRATES_IO_TOKEN
-    - cargo publish
 
 release:
   <<: *publish

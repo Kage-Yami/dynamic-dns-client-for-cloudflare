@@ -5,7 +5,8 @@
 
 apk add \
   curl \
-  jq
+  jq \
+  unzip
 
 attempt=0
 workflow_id="null"
@@ -62,10 +63,12 @@ for i in 0 1 2 3 4 5 6 7; do
   link=$(echo "$links" | jq --raw-output ".[$i].url")
 
   echo "Downloading artifact $((i + 1)): $name..."
+  echo "Link: $link"
 
   mkdir "$name"
-  curl --user "Kage-Yami:$GITHUB_API_TOKEN" "$link" --output "$name.zip"
-  tar xzvf "$name.zip" -C "$name/"
+  curl --header "accept: application/vnd.github.v3+json" \
+    --user "Kage-Yami:$GITHUB_API_TOKEN" "$link" --output "$name.zip"
+  unzip "$name.zip" -d "$name/"
 
   echo "... download complete! Uploading artifact..."
 
