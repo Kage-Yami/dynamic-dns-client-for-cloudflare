@@ -41,7 +41,11 @@ workflow:
 .build: &build
   stage: build
   rules:
-    - if: $CI_COMMIT_REF_PROTECTED
+    - if: $CI_COMMIT_TAG
+      when: on_success
+    - if: $CI_COMMIT_REF_SLUG == "main"
+      when: on_success
+    - if: $CI_COMMIT_REF_SLUG == "develop"
       when: on_success
     - when: never
 
@@ -75,7 +79,7 @@ format:
     - cargo fmt -- --check
 
 ###################################################### BUILD JOBS ######################################################
-## These run for all pipelines (as they're relevant to both untagged and tagged runs).
+## These run for tagged and untagged pipelines, but only for "main" and "develop" branches.
 ########################################################################################################################
 
 # Runs after `check::version` (below) in tagged pipelines
