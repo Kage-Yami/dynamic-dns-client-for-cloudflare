@@ -22,8 +22,8 @@ path = "src/main.rs"
 [dependencies]
 anyhow = "1.0.38"
 argh = "0.1.4"
-serde = { version = "1.0.120", features = ["derive"] }
-ureq = { version = "2.0.1", features = ["json"] }
+serde = { version = "1.0.124", features = ["derive"] }
+ureq = { version = "2.0.2", features = ["json"] }
 
 [build-dependencies]
 

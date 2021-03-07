@@ -1,6 +1,6 @@
 default:
   interruptible: true
-  image: registry.gitlab.com/kage-yami/dockerfile/rust:1.49.0-main
+  image: registry.gitlab.com/kage-yami/dockerfile/rust:1.50.0-main
   retry:
     max: 2
     when:
@@ -16,6 +16,11 @@ cache:
   key: $CI_COMMIT_REF_SLUG.$CI_JOB_NAME
   paths:
     - target
+
+workflow:
+  rules:
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH
 
 #################################################### JOB TEMPLATES #####################################################
 
@@ -36,7 +41,11 @@ cache:
 .build: &build
   stage: build
   rules:
-    - if: $CI_COMMIT_REF_PROTECTED
+    - if: $CI_COMMIT_TAG
+      when: on_success
+    - if: $CI_COMMIT_REF_SLUG == "main"
+      when: on_success
+    - if: $CI_COMMIT_REF_SLUG == "develop"
       when: on_success
     - when: never
 
@@ -70,13 +79,13 @@ format:
     - cargo fmt -- --check
 
 ###################################################### BUILD JOBS ######################################################
-## These run for all pipelines (as they're relevant to both untagged and tagged runs).
+## These run for tagged and untagged pipelines, but only for "main" and "develop" branches.
 ########################################################################################################################
 
 # Runs after `check::version` (below) in tagged pipelines
 builds:
   <<: *build
-  image: alpine:3.13.0
+  image: alpine:3.13.2
   script:
     - chmod u+x ./scripts/fetch-github-artifacts.sh
     - ./scripts/fetch-github-artifacts.sh
@@ -93,7 +102,7 @@ version:
 
 release:
   <<: *publish
-  image: registry.gitlab.com/gitlab-org/release-cli:v0.5.0
+  image: registry.gitlab.com/gitlab-org/release-cli:v0.6.0
   variables:
     REGISTRY: $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic
     PACKAGE: $CI_COMMIT_TAG/ddns-for-cloudflare

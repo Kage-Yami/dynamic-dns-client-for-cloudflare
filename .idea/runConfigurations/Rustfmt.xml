@@ -1,8 +1,9 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Document" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
-    <option name="command" value="doc" />
+  <configuration default="false" name="Rustfmt" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+    <option name="command" value="fmt -- --check" />
     <option name="workingDirectory" value="file://$PROJECT_DIR$" />
     <option name="channel" value="DEFAULT" />
+    <option name="requiredFeatures" value="true" />
     <option name="allFeatures" value="false" />
     <option name="emulateTerminal" value="false" />
     <option name="backtrace" value="SHORT" />

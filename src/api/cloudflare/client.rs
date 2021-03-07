@@ -54,10 +54,10 @@ impl<'a> Client<'a> {
                             "Errors returned from Zones API; first one (see stderr for others): {}",
                             body.errors()[0]
                         );
-                    } else {
-                        // cannot panic; only runs when body.errors.len() >= 1
-                        anyhow::bail!("Error returned from Zones API: {}", body.errors()[0]);
                     }
+
+                    // cannot panic; only runs when body.errors.len() >= 1
+                    anyhow::bail!("Error returned from Zones API: {}", body.errors()[0]);
                 }
 
                 if let Some(mut result) = body.take_result() {
@@ -109,10 +109,10 @@ impl<'a> Client<'a> {
                             "Errors returned from DNS Records API; first one (see stderror for others): {}",
                             body.errors()[0]
                         );
-                    } else {
-                        // cannot panic; only runs with body.errors.len() >= 1
-                        anyhow::bail!("Error returned from DNS Records API: {}", body.errors()[0]);
                     }
+
+                    // cannot panic; only runs with body.errors.len() >= 1
+                    anyhow::bail!("Error returned from DNS Records API: {}", body.errors()[0]);
                 }
 
                 if let Some(mut result) = body.take_result() {
@@ -161,10 +161,9 @@ impl<'a> Client<'a> {
                             "Errors returned from DNS Records update API; first one (see stderror for others): {}",
                             body.errors()[0]
                         );
-                    } else {
-                        // cannot panic; only runs when body.errors.len() >= 1
-                        anyhow::bail!("Error returned from DNS Records update API: {}", body.errors()[0]);
                     }
+                    // cannot panic; only runs when body.errors.len() >= 1
+                    anyhow::bail!("Error returned from DNS Records update API: {}", body.errors()[0]);
                 }
 
                 Ok(())
