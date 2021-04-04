@@ -1,6 +1,7 @@
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 pub enum DnsRecordType {
     A,
+    #[allow(clippy::upper_case_acronyms)]
     AAAA,
 }
 
