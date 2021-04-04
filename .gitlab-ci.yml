@@ -1,6 +1,6 @@
 default:
   interruptible: true
-  image: registry.gitlab.com/kage-yami/dockerfile/rust:1.50.0-main
+  image: registry.gitlab.com/kage-yami/dockerfile/rust:1.51.0-main
   retry:
     max: 2
     when:
