@@ -85,7 +85,7 @@ format:
 # Runs after `check::version` (below) in tagged pipelines
 builds:
   <<: *build
-  image: alpine:3.13.2
+  image: alpine:3.13.4
   script:
     - chmod u+x ./scripts/fetch-github-artifacts.sh
     - ./scripts/fetch-github-artifacts.sh
