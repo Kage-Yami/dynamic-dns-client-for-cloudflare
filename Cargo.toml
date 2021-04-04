@@ -20,7 +20,7 @@ name = "ddns-for-cloudflare"
 path = "src/main.rs"
 
 [dependencies]
-anyhow = "1.0.38"
+anyhow = "1.0.40"
 argh = "0.1.4"
 serde = { version = "1.0.125", features = ["derive"] }
 ureq = { version = "2.1.0", features = ["json"] }
