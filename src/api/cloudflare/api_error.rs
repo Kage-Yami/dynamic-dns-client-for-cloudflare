@@ -5,7 +5,7 @@ use std::error::Error;
 pub struct ApiError {
     code: i128,
     message: String,
-    error_chain: Option<Vec<ApiError>>,
+    error_chain: Option<Vec<Self>>,
 }
 
 impl std::fmt::Display for ApiError {
